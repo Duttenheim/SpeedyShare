@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>600</width>
-    <height>119</height>
+    <height>186</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -15,24 +15,34 @@
   </property>
   <widget class="QWidget" name="centralWidget">
    <layout class="QGridLayout" name="gridLayout">
-    <item row="0" column="1">
-     <widget class="QLabel" name="statusLabel">
-      <property name="text">
-       <string>Not connected</string>
-      </property>
-      <property name="alignment">
-       <set>Qt::AlignCenter</set>
-      </property>
-     </widget>
+    <item row="0" column="0" colspan="2">
+     <layout class="QGridLayout" name="gridLayout_2">
+      <item row="0" column="0">
+       <widget class="QPushButton" name="connectButton">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="text">
+         <string>Connect...</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="1">
+       <widget class="QLabel" name="statusLabel">
+        <property name="text">
+         <string>Not connected</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignCenter</set>
+        </property>
+       </widget>
+      </item>
+     </layout>
     </item>
-    <item row="0" column="0">
-     <widget class="QPushButton" name="connectButton">
-      <property name="text">
-       <string>Connect...</string>
-      </property>
-     </widget>
-    </item>
-    <item row="1" column="0" colspan="2">
+    <item row="4" column="0" colspan="2">
      <widget class="QPushButton" name="sendButton">
       <property name="enabled">
        <bool>false</bool>
@@ -42,8 +52,21 @@
       </property>
      </widget>
     </item>
-    <item row="2" column="0" colspan="2">
+    <item row="5" column="0" colspan="2">
      <layout class="QVBoxLayout" name="downloadLayout"/>
+    </item>
+    <item row="6" column="0" colspan="2">
+     <spacer name="verticalSpacer">
+      <property name="orientation">
+       <enum>Qt::Vertical</enum>
+      </property>
+      <property name="sizeHint" stdset="0">
+       <size>
+        <width>20</width>
+        <height>40</height>
+       </size>
+      </property>
+     </spacer>
     </item>
    </layout>
   </widget>
@@ -60,8 +83,6 @@
   <widget class="QStatusBar" name="statusBar"/>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
- <resources>
-  <include location="speedyshare.qrc"/>
- </resources>
+ <resources/>
  <connections/>
 </ui>

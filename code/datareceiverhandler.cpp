@@ -1,5 +1,10 @@
 #include "datareceiverhandler.h"
+
+#if __QT5__
 #include <QtWidgets/QApplication>
+#else
+#include <QtGui/QApplication>
+#endif
 #include <QDataStream>
 #define MAXPACKAGESIZE 65535
 

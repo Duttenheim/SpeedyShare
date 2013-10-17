@@ -1,9 +1,16 @@
 #ifndef SPEEDYSHARE_H
 #define SPEEDYSHARE_H
 
+#if __QT5__
 #include <QtWidgets/QMainWindow>
 #include <QtWidgets/QFileDialog>
 #include <QtWidgets/QProgressBar>
+#else
+#include <QtGui/QMainWindow>
+#include <QtGui/QFileDialog>
+#include <QtGui/QProgressBar>
+#endif
+
 #include "senderthread.h"
 #include "receiverthread.h"
 #include "ui_speedyshare.h"
@@ -45,6 +52,7 @@ public slots:
 	void OnFileStarted(const QString& file, int chunks, int index);
 	/// called whenever the send button is pressed
 	void OnSendPressed();
+
 private:
 	ReceiverThread receiverThread;
 	SenderThread senderThread;

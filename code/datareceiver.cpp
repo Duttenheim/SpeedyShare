@@ -1,5 +1,11 @@
 #include "datareceiver.h"
+
+#if __QT5__
 #include <QtWidgets/QMessageBox>
+#else
+#include <QtGui/QMessageBox>
+#endif
+
 #include <QtNetwork/QTcpSocket>
 #include <QtNetwork/QNetworkProxy>
 

@@ -1,6 +1,12 @@
 #include "speedyshare.h"
-#include <QtWidgets/QMessageBox>
 
+#if __QT5__
+#include <QtWidgets/QMessageBox>
+#else
+#include <QtGui/QMessageBox>
+#endif
+
+#include <QtNetwork/QNetworkProxy>
 
 //------------------------------------------------------------------------------------
 /**
@@ -16,12 +22,6 @@ SpeedyShare::SpeedyShare(QWidget *parent, Qt::WindowFlags flags) :
 	this->fileDialog.setAcceptMode(QFileDialog::AcceptOpen);
 	this->fileDialog.setFileMode(QFileDialog::ExistingFiles);
 
-	/*
-	QRegExpValidator *v = new QRegExpValidator(this);
-	QRegExp rx("((1{0,1}[0-9]{0,2}|2[0-4]{1,1}[0-9]{1,1}|25[0-5]{1,1})\\.){3,3}(1{0,1}[0-9]{0,2}|2[0-4]{1,1}[0-9]{1,1}|25[0-5]{1,1})");
-	v->setRegExp(rx);
-	this->dialogUi.address->setValidator(v);
-	*/
 
 	connect(this->ui.connectButton, SIGNAL(pressed()), this, SLOT(OnConnectPressed()));
 	connect(this->ui.sendButton, SIGNAL(pressed()), this, SLOT(OnSendPressed()));

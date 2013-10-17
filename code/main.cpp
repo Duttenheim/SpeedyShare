@@ -1,6 +1,12 @@
 #include "speedyshare.h"
+#if __QT5__
 #include <QtWidgets/QApplication>
 #include <QtWidgets/QStyleFactory>
+#else
+#include <QtGui/QApplication>
+#include <QtGui/QStyleFactory>
+#endif
+
 
 
 //------------------------------------------------------------------------------------
