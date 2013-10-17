@@ -31,9 +31,9 @@ public:
 
 signals:
 	/// emitted when a file is accepted
-	void FileAccepted(QString file, int index);
+	void FileAccepted(const QString& file, int index);
 	/// emitted when a file is denied
-	void FileDenied(QString file, int index);
+	void FileDenied(const QString& file, int index);
 private slots:
 	/// called whenever the connect button is pressed
 	void OnConnectPressed();
@@ -43,21 +43,21 @@ public slots:
 	/// called whenever the sender is disconnected
 	void OnSenderDisconnected();
 	/// called whenever a file is requested
-	void OnFileRequested(QString file, int index);
+	void OnFileRequested(const QString& file, int index);
 
 	/// called whenever a file is done
-	void OnFileReceiveDone(QString file, int index);
+	void OnFileReceiveDone(const QString& file, int index);
 	/// called when a file is progressing
-	void OnFileReceiveProgress(QString file, const QByteArray& chunk, int index);
+	void OnFileReceiveProgress(const QString& file, const QByteArray& chunk, int index);
 	/// called whenever a file progress is done
-	void OnFileReceiveStarted(QString file, int chunks, int index);
+	void OnFileReceiveStarted(const QString& file, int chunks, int index);
 
 	/// called whenever a file is done
-	void OnFileSendDone(QString file);
+	void OnFileSendDone(const QString& file);
 	/// called when a file is progressing
-	void OnFileSendProgress(QString file, int numBytes);
+	void OnFileSendProgress(const QString& file, int numBytes);
 	/// called whenever a file progress is done
-	void OnFileSendStarted(QString file, int chunks);
+	void OnFileSendStarted(const QString& file, int chunks);
 
 	/// called whenever the send button is pressed
 	void OnSendPressed();
