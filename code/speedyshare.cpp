@@ -182,13 +182,15 @@ SpeedyShare::OnFileReceiveDone( const QString& file, int index )
 	// delete and remove label
 	QLabel* label = this->labelReceiveMap[index][file];
 	this->ui.downloadLayout->removeWidget(label);
-	delete label;
 
 	// update text
 	QString msg;
 	msg.sprintf("Writing %s to file", file.toUtf8().constData());
 	label->setText(msg);
 	QApplication::processEvents();
+
+	// delete label
+	delete label;
 
 	// get file handle
 	QFile* fileHandle = this->fileReceiveMap[index][file];
@@ -222,13 +224,8 @@ SpeedyShare::OnFileReceiveProgress( const QString& file, const QByteArray& chunk
 //------------------------------------------------------------------------------
 /**
 */
-<<<<<<< HEAD
-void
-SpeedyShare::OnFileReceiveStarted( QString file, int chunks, int index )
-=======
 void 
 SpeedyShare::OnFileReceiveStarted( const QString& file, int chunks, int index )
->>>>>>> 26313121035bd5db7fef38e19031b7785e54160e
 {
 	Q_ASSERT(this->fileReceiveMap[index].contains(file));
 
