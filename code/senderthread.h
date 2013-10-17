@@ -46,11 +46,26 @@ public slots:
 	/// called whenever the data sender is disconnected
 	void OnDisconnected();
 
+private slots:
+	/// called whenever a file is done
+	void OnFileDone(const QString& file);
+	/// called whenever a file progress is done
+	void OnFileProgress(const QString& file, int numBytes);
+	/// called when a file has started
+	void OnFileStarted(const QString& file, int chunks);
+
 signals:
 	/// emit when connection is successful
 	void ConnectionSuccessful();
 	/// emit when connection is killed
 	void Disconnected();
+
+	/// emitted when a file is done
+	void FileDone(const QString& file);
+	/// emitted when a file progress is done
+	void FileProgress(const QString& file, int numBytes);
+	/// emitted when a file is started
+	void FileStarted(const QString& file, int chunks);
 private:
 	/// runs thread
 	void run();

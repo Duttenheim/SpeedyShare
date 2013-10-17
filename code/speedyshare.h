@@ -44,12 +44,21 @@ public slots:
 	void OnSenderDisconnected();
 	/// called whenever a file is requested
 	void OnFileRequested(const QString& file, int index);
+
 	/// called whenever a file is done
-	void OnFileDone(const QString& file, int index);
+	void OnFileReceiveDone(const QString& file, int index);
 	/// called when a file is progressing
-	void OnFileProgress(const QString& file, const QByteArray& chunk, int index);
+	void OnFileReceiveProgress(const QString& file, const QByteArray& chunk, int index);
 	/// called whenever a file progress is done
-	void OnFileStarted(const QString& file, int chunks, int index);
+	void OnFileReceiveStarted(const QString& file, int chunks, int index);
+
+	/// called whenever a file is done
+	void OnFileSendDone(const QString& file);
+	/// called when a file is progressing
+	void OnFileSendProgress(const QString& file, int numBytes);
+	/// called whenever a file progress is done
+	void OnFileSendStarted(const QString& file, int chunks);
+
 	/// called whenever the send button is pressed
 	void OnSendPressed();
 
@@ -60,9 +69,12 @@ private:
 	QFileDialog fileDialog;
 	Ui::ConnectDialog dialogUi;
 	Ui::SpeedyShareClass ui;
-	QMap<int, QMap<QString, QFile*> > fileMap;
-	QMap<int, QMap<QString, QProgressBar*> > progressMap;
-	QMap<int, QMap<QString, QLabel*> > labelMap;
+	QMap<int, QMap<QString, QFile*> > fileReceiveMap;
+	QMap<int, QMap<QString, QProgressBar*> > progressReceiveMap;
+	QMap<int, QMap<QString, QLabel*> > labelReceiveMap;
+	QMap<QString, QFile*> fileSendMap;
+	QMap<QString, QProgressBar*> progressSendMap;
+	QMap<QString, QLabel*> labelSendMap;
 	bool isConnected;
 };
 

@@ -8,7 +8,7 @@
 
 #include <QtNetwork/QNetworkProxy>
 
-//------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 /**
 */
 SpeedyShare::SpeedyShare(QWidget *parent, Qt::WindowFlags flags) : 
@@ -26,19 +26,22 @@ SpeedyShare::SpeedyShare(QWidget *parent, Qt::WindowFlags flags) :
 	connect(this->ui.connectButton, SIGNAL(pressed()), this, SLOT(OnConnectPressed()));
 	connect(this->ui.sendButton, SIGNAL(pressed()), this, SLOT(OnSendPressed()));
 	connect(&this->receiverThread, SIGNAL(FileRequested(const QString&, int)), this, SLOT(OnFileRequested(const QString&, int)));
-	connect(&this->receiverThread, SIGNAL(FileDone(const QString&, int)), this, SLOT(OnFileDone(const QString&, int)));
-	connect(&this->receiverThread, SIGNAL(FileProgress(const QString&, const QByteArray&, int)), this, SLOT(OnFileProgress(const QString&, const QByteArray&, int)));
-	connect(&this->receiverThread, SIGNAL(FileStarted(const QString&, int, int)), this, SLOT(OnFileStarted(const QString&, int, int)));
+	connect(&this->receiverThread, SIGNAL(FileDone(const QString&, int)), this, SLOT(OnFileReceiveDone(const QString&, int)));
+	connect(&this->receiverThread, SIGNAL(FileProgress(const QString&, const QByteArray&, int)), this, SLOT(OnFileReceiveProgress(const QString&, const QByteArray&, int)));
+	connect(&this->receiverThread, SIGNAL(FileStarted(const QString&, int, int)), this, SLOT(OnFileReceiveStarted(const QString&, int, int)));
 	connect(this, SIGNAL(FileAccepted(const QString&, int)), &this->receiverThread, SLOT(OnFileAccepted(const QString&, int)));
 	connect(this, SIGNAL(FileDenied(const QString&, int)), &this->receiverThread, SLOT(OnFileDenied(const QString&, int)));
 	connect(&this->senderThread, SIGNAL(ConnectionSuccessful()), this, SLOT(OnSenderConnected()));
 	connect(&this->senderThread, SIGNAL(Disconnected()), this, SLOT(OnSenderDisconnected()));	
+	connect(&this->senderThread, SIGNAL(FileDone(const QString&)), this, SLOT(OnFileSendDone(const QString&)));
+	connect(&this->senderThread, SIGNAL(FileProgress(const QString&, int)), this, SLOT(OnFileSendProgress(const QString&, int)));
+	connect(&this->senderThread, SIGNAL(FileStarted(const QString&, int)), this, SLOT(OnFileSendStarted(const QString&, int)));
 
 	// open receiver
 	this->receiverThread.Start();
 }
 
-//------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 /**
 */
 SpeedyShare::~SpeedyShare()
@@ -148,18 +151,16 @@ SpeedyShare::OnFileRequested(const QString& file, int index)
 				QLabel* label = new QLabel(this);
 				this->ui.downloadLayout->addWidget(bar);
 				this->ui.downloadLayout->addWidget(label);
-				this->progressMap[index][file] = bar;
-				this->fileMap[index][file] = fileHandle;
-				this->labelMap[index][file] = label;
+				this->progressReceiveMap[index][file] = bar;
+				this->fileReceiveMap[index][file] = fileHandle;
+				this->labelReceiveMap[index][file] = label;
 				emit this->FileAccepted(file, index);
 			}
 			else
 			{
 				emit this->FileDenied(file, index);
 			}
-		}
-
-		
+		}		
 	}
 	else
 	{
@@ -171,28 +172,94 @@ SpeedyShare::OnFileRequested(const QString& file, int index)
 /**
 */
 void 
-SpeedyShare::OnFileDone( const QString& file, int index )
+SpeedyShare::OnFileReceiveDone( const QString& file, int index )
 {
-	Q_ASSERT(this->fileMap[index].contains(file));
+	Q_ASSERT(this->fileReceiveMap[index].contains(file));
 
 	// delete and remove label
-	QLabel* label = this->labelMap[index][file];
+	QLabel* label = this->labelReceiveMap[index][file];
+	this->ui.downloadLayout->removeWidget(label);
+	delete label;
 
 	// update text
 	label->setText("Writing: " + file + " to file...");
 	QApplication::processEvents();
 
 	// get file handle
-	QFile* fileHandle = this->fileMap[index][file];
+	QFile* fileHandle = this->fileReceiveMap[index][file];
 	fileHandle->close();
 	delete fileHandle;
 
 	// delete and remove progress bar
-	QProgressBar* progressBar = this->progressMap[index][file];
+	QProgressBar* progressBar = this->progressReceiveMap[index][file];
 	this->ui.downloadLayout->removeWidget(progressBar);
 	delete progressBar;
+}
 
-	this->ui.downloadLayout->removeWidget(label);
+//------------------------------------------------------------------------------
+/**
+*/
+void 
+SpeedyShare::OnFileReceiveProgress( const QString& file, const QByteArray& chunk, int index )
+{
+	Q_ASSERT(this->fileReceiveMap[index].contains(file));
+
+	// get file
+	QFile* fileHandle = this->fileReceiveMap[index][file];
+	Q_ASSERT(fileHandle->isOpen());
+	fileHandle->write(chunk);
+
+	// get progress bar
+	QProgressBar* bar = this->progressReceiveMap[index][file];
+	bar->setValue(bar->value() + 1);
+}
+
+//------------------------------------------------------------------------------
+/**
+*/
+void 
+SpeedyShare::OnFileReceiveStarted( const QString& file, int chunks, int index )
+{
+	Q_ASSERT(this->fileReceiveMap[index].contains(file));
+
+	// get progress bar
+	QProgressBar* progressBar = this->progressReceiveMap[index][file];
+	progressBar->setMaximum(chunks);
+
+	// get progress bar
+	QProgressBar* bar = this->progressReceiveMap[index][file];
+	
+	// rescale progress bar
+	bar->setMinimum(0);
+	bar->setMaximum(chunks);
+	bar->setValue(0);
+
+	// set text of label
+	QLabel* label = this->labelReceiveMap[index][file];
+	label->setText("Downloading: " + file);
+}
+
+//------------------------------------------------------------------------------
+/**
+*/
+void 
+SpeedyShare::OnFileSendDone( const QString& file )
+{
+	Q_ASSERT(this->fileSendMap.contains(file));
+
+	// get file
+	QFile* fileHandle = this->fileSendMap[file];
+	fileHandle->close();
+	delete fileHandle;
+
+	// get progress bar
+	QProgressBar* bar = this->progressSendMap[file];
+	this->ui.uploadLayout->removeWidget(bar);
+	delete bar;
+
+	// get label
+	QLabel* label = this->labelSendMap[file];
+	this->ui.uploadLayout->removeWidget(label);
 	delete label;
 }
 
@@ -200,37 +267,32 @@ SpeedyShare::OnFileDone( const QString& file, int index )
 /**
 */
 void 
-SpeedyShare::OnFileProgress( const QString& file, const QByteArray& chunk, int index )
+SpeedyShare::OnFileSendProgress( const QString& file, int numBytes )
 {
-	Q_ASSERT(this->fileMap[index].contains(file));
+	Q_ASSERT(this->fileSendMap.contains(file));
 
-	// get file
-	QFile* fileHandle = this->fileMap[index][file];
-	Q_ASSERT(fileHandle->isOpen());
-	fileHandle->write(chunk);
-
-	// get progress bar
-	QProgressBar* bar = this->progressMap[index][file];
+	// get progress bar and update
+	QProgressBar* bar = this->progressSendMap[file];
 	bar->setValue(bar->value() + 1);
-
-
 }
 
 //------------------------------------------------------------------------------
 /**
 */
 void 
-SpeedyShare::OnFileStarted( const QString& file, int chunks, int index )
+SpeedyShare::OnFileSendStarted( const QString& file, int chunks )
 {
-	Q_ASSERT(this->fileMap[index].contains(file));
+	Q_ASSERT(this->fileSendMap.contains(file));
 
 	// get progress bar
-	QProgressBar* progressBar = this->progressMap[index][file];
-	progressBar->setMaximum(chunks);
+	QProgressBar* bar = this->progressSendMap[file];
+	bar->setMinimum(0);
+	bar->setMaximum(chunks);
+	bar->setValue(0);
 
-	// set text of label
-	QLabel* label = this->labelMap[index][file];
-	label->setText("Downloading: " + file);
+	// get label
+	QLabel* label = this->labelSendMap[file];
+	label->setText("Uploading: " + file);
 }
 
 //------------------------------------------------------------------------------
@@ -240,7 +302,6 @@ void
 SpeedyShare::OnSendPressed()
 {
 	int res = this->fileDialog.exec();
-
 	if (res == QDialog::Accepted)
 	{
 		// get files
@@ -265,11 +326,27 @@ SpeedyShare::OnSendPressed()
 					package.SetName(file);
 					package.SetFile(fileHandle);
 
+					// enqueue package in sender thread
 					this->senderThread.Enqueue(package);
+
+					// create UI for sender files
+					QProgressBar* bar = new QProgressBar(this);
+					QLabel* label = new QLabel(this);
+
+					this->ui.downloadLayout->addWidget(bar);
+					this->ui.downloadLayout->addWidget(label);
+					this->fileSendMap[file] = fileHandle;
+					this->progressSendMap[file] = bar;
+					this->labelSendMap[file] = label;
+				}
+				else
+				{
+					delete fileHandle;
 				}
 			}
 			else
 			{
+				delete fileHandle;
 				qErrnoWarning("Could not open file: %s/n", file.toUtf8().constData());
 			}			
 		}

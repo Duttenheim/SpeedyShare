@@ -140,6 +140,9 @@ DataSender::OnRead()
 			// clear package
 			dataPackage.clear();
 
+			// trigger data send start
+			emit FileStarted(package.GetName(), numPackages);
+
 			// go through packages
 			int i;
 			for (i = 0; i < numPackages; i++)
@@ -152,18 +155,22 @@ DataSender::OnRead()
 				this->write(dataPackage);
 				this->waitForBytesWritten(-1);
 
+				// trigget data progress
+				emit FileProgress(package.GetName(), packageSize);
+
 				// clear package for next loop
-				dataPackage.clear();
-			
+				dataPackage.clear();			
 			}
 
 			// close file
 			fileHandle->close();
 
+			// trigger data send done
+			emit FileDone(package.GetName());
 		}
 		else
 		{
-
+			// do nothing, the send was denied
 		}
 	}
 }

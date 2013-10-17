@@ -39,6 +39,14 @@ public:
 
 	/// called whenever there is anything to read
 	void OnRead();
+
+signals:
+	/// called whenever a new connection is established
+	void FileDone(const QString& file);
+	/// emitted when a file has started downloading
+	void FileStarted(const QString& file, int chunks);
+	/// emitted when a file is progressing
+	void FileProgress(const QString& file, int numBytes);
 private:
 	QMap<QString, FilePackage> pendingPackages;
 	QHostAddress address;

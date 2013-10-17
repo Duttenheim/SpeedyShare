@@ -16,7 +16,11 @@ int main(int argc, char *argv[])
 {
 	qRegisterMetaType<FilePackage>("FilePackage");
 	QApplication a(argc, argv);
+#if __QT5__
 	QStyle* style = QStyleFactory::create("fusion");
+#else
+	QStyle* style = QStyleFactory::create("plastique");
+#endif
 	a.setStyle(style);
 	SpeedyShare w;	
 	w.show();

@@ -41,6 +41,7 @@ private:
 	QByteArray data;
 	QFile* file;
 };
+
 Q_DECLARE_METATYPE(FilePackage);
 //------------------------------------------------------------------------------
 /**
