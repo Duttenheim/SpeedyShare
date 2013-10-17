@@ -24,27 +24,27 @@ public:
 
 public slots:
 	/// called whenever a file is accepted
-	void OnFileAccepted(const QString& file, int index);
+	void OnFileAccepted(QString file, int index);
 	/// called whenever a file is denied
-	void OnFileDenied(const QString& file, int index);
+	void OnFileDenied(QString file, int index);
 private slots:
 	/// called whenever a file is requested
-	void OnFileRequested(const QString& file, int index);
+	void OnFileRequested(QString file, int index);
 	/// called whenever a file is done
-	void OnFileDone(const QString& file, int index);
+	void OnFileDone(QString file, int index);
 	/// called whenever a file progress is done
-	void OnFileProgress(const QString& file, const QByteArray& chunk, int index);
+	void OnFileProgress(QString file, const QByteArray& chunk, int index);
 	/// called when a file has started
-	void OnFileStarted(const QString& file, int chunks, int index);
+	void OnFileStarted(QString file, int chunks, int index);
 signals:
 	/// emitted when a file is requested
-	void FileRequested(const QString& file, int index);
+	void FileRequested(QString file, int index);
 	/// emitted when a file is done
-	void FileDone(const QString& file, int index);
+	void FileDone(QString file, int index);
 	/// emitted when a file progress is done
-	void FileProgress(const QString& file, const QByteArray& chunk, int index);
+	void FileProgress(QString file, const QByteArray& chunk, int index);
 	/// emitted when a file is started
-	void FileStarted(const QString& file, int chunks, int index);
+	void FileStarted(QString file, int chunks, int index);
 private:
 	/// runs thread
 	void run();

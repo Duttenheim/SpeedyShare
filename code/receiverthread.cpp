@@ -47,9 +47,9 @@ ReceiverThread::run()
 
 	// connect
 	connect(this->receiver, SIGNAL(NewRequest(const QString&, int)), this, SLOT(OnFileRequested(const QString&, int)));
-	connect(this->receiver, SIGNAL(FileDone(const QString&, int)), this, SLOT(OnFileDone(const QString&, int)));
-	connect(this->receiver, SIGNAL(FileProgress(const QString&, const QByteArray&, int)), this, SLOT(OnFileProgress(const QString&, const QByteArray&, int)));
-	connect(this->receiver, SIGNAL(FileStarted(const QString&, int, int)), this, SLOT(OnFileStarted(const QString&, int, int)));
+	connect(this->receiver, SIGNAL(FileDone(QString, int)), this, SLOT(OnFileDone(QString, int)));
+	connect(this->receiver, SIGNAL(FileProgress(QString, const QByteArray&, int)), this, SLOT(OnFileProgress(QString, const QByteArray&, int)));
+	connect(this->receiver, SIGNAL(FileStarted(QString, int, int)), this, SLOT(OnFileStarted(QString, int, int)));
 
 	// open receiver
 	bool isListening = this->receiver->Open();
@@ -74,7 +74,7 @@ ReceiverThread::run()
 /**
 */
 void 
-ReceiverThread::OnFileRequested( const QString& file, int index )
+ReceiverThread::OnFileRequested( QString file, int index )
 {
 	emit this->FileRequested(file, index);
 }
@@ -83,7 +83,7 @@ ReceiverThread::OnFileRequested( const QString& file, int index )
 /**
 */
 void 
-ReceiverThread::OnFileDone( const QString& file, int index )
+ReceiverThread::OnFileDone( QString file, int index )
 {
 	emit this->FileDone(file, index);
 }
@@ -92,7 +92,7 @@ ReceiverThread::OnFileDone( const QString& file, int index )
 /**
 */
 void 
-ReceiverThread::OnFileProgress( const QString& file, const QByteArray& chunk, int index )
+ReceiverThread::OnFileProgress( QString file, const QByteArray& chunk, int index )
 {
 	emit this->FileProgress(file, chunk, index);
 }
@@ -101,7 +101,7 @@ ReceiverThread::OnFileProgress( const QString& file, const QByteArray& chunk, in
 /**
 */
 void 
-ReceiverThread::OnFileStarted( const QString& file, int chunks, int index )
+ReceiverThread::OnFileStarted( QString file, int chunks, int index )
 {
 	emit this->FileStarted(file, chunks, index);
 }
@@ -110,7 +110,7 @@ ReceiverThread::OnFileStarted( const QString& file, int chunks, int index )
 /**
 */
 void 
-ReceiverThread::OnFileAccepted( const QString& file, int index )
+ReceiverThread::OnFileAccepted( QString file, int index )
 {
 	this->receiver->OnAcceptFile(file, index);
 }
@@ -119,7 +119,7 @@ ReceiverThread::OnFileAccepted( const QString& file, int index )
 /**
 */
 void 
-ReceiverThread::OnFileDenied( const QString& file, int index )
+ReceiverThread::OnFileDenied( QString file, int index )
 {
 	this->receiver->OnDenyFile(file, index);
 }

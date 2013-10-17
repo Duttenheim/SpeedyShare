@@ -25,17 +25,17 @@ SpeedyShare::SpeedyShare(QWidget *parent, Qt::WindowFlags flags) :
 
 	connect(this->ui.connectButton, SIGNAL(pressed()), this, SLOT(OnConnectPressed()));
 	connect(this->ui.sendButton, SIGNAL(pressed()), this, SLOT(OnSendPressed()));
-	connect(&this->receiverThread, SIGNAL(FileRequested(const QString&, int)), this, SLOT(OnFileRequested(const QString&, int)));
-	connect(&this->receiverThread, SIGNAL(FileDone(const QString&, int)), this, SLOT(OnFileReceiveDone(const QString&, int)));
-	connect(&this->receiverThread, SIGNAL(FileProgress(const QString&, const QByteArray&, int)), this, SLOT(OnFileReceiveProgress(const QString&, const QByteArray&, int)));
-	connect(&this->receiverThread, SIGNAL(FileStarted(const QString&, int, int)), this, SLOT(OnFileReceiveStarted(const QString&, int, int)));
-	connect(this, SIGNAL(FileAccepted(const QString&, int)), &this->receiverThread, SLOT(OnFileAccepted(const QString&, int)));
-	connect(this, SIGNAL(FileDenied(const QString&, int)), &this->receiverThread, SLOT(OnFileDenied(const QString&, int)));
+	connect(&this->receiverThread, SIGNAL(FileRequested(QString, int)), this, SLOT(OnFileRequested(QString, int)));
+	connect(&this->receiverThread, SIGNAL(FileDone(QString, int)), this, SLOT(OnFileReceiveDone(QString, int)));
+	connect(&this->receiverThread, SIGNAL(FileProgress(QString, const QByteArray&, int)), this, SLOT(OnFileReceiveProgress(QString, const QByteArray&, int)));
+	connect(&this->receiverThread, SIGNAL(FileStarted(QString, int, int)), this, SLOT(OnFileReceiveStarted(QString, int, int)));
+	connect(this, SIGNAL(FileAccepted(QString, int)), &this->receiverThread, SLOT(OnFileAccepted(QString, int)));
+	connect(this, SIGNAL(FileDenied(QString, int)), &this->receiverThread, SLOT(OnFileDenied(QString, int)));
 	connect(&this->senderThread, SIGNAL(ConnectionSuccessful()), this, SLOT(OnSenderConnected()));
 	connect(&this->senderThread, SIGNAL(Disconnected()), this, SLOT(OnSenderDisconnected()));	
-	connect(&this->senderThread, SIGNAL(FileDone(const QString&)), this, SLOT(OnFileSendDone(const QString&)));
-	connect(&this->senderThread, SIGNAL(FileProgress(const QString&, int)), this, SLOT(OnFileSendProgress(const QString&, int)));
-	connect(&this->senderThread, SIGNAL(FileStarted(const QString&, int)), this, SLOT(OnFileSendStarted(const QString&, int)));
+	connect(&this->senderThread, SIGNAL(FileDone(QString)), this, SLOT(OnFileSendDone(QString)));
+	connect(&this->senderThread, SIGNAL(FileProgress(QString, int)), this, SLOT(OnFileSendProgress(QString, int)));
+	connect(&this->senderThread, SIGNAL(FileStarted(QString, int)), this, SLOT(OnFileSendStarted(QString, int)));
 
 	// open receiver
 	this->receiverThread.Start();
@@ -73,6 +73,9 @@ SpeedyShare::OnConnectPressed()
 	}
 	else
 	{
+		// stop thread
+		this->senderThread.Stop();
+
 		// open dialog
 		int res = this->connectDialog.exec();
 
@@ -125,7 +128,7 @@ SpeedyShare::OnSenderDisconnected()
 /**
 */
 void 
-SpeedyShare::OnFileRequested(const QString& file, int index)
+SpeedyShare::OnFileRequested(QString file, int index)
 {
 	QMessageBox box;
 	box.setText("File: " + file + " is requested for download");
@@ -172,7 +175,7 @@ SpeedyShare::OnFileRequested(const QString& file, int index)
 /**
 */
 void 
-SpeedyShare::OnFileReceiveDone( const QString& file, int index )
+SpeedyShare::OnFileReceiveDone( QString file, int index )
 {
 	Q_ASSERT(this->fileReceiveMap[index].contains(file));
 
@@ -200,7 +203,7 @@ SpeedyShare::OnFileReceiveDone( const QString& file, int index )
 /**
 */
 void 
-SpeedyShare::OnFileReceiveProgress( const QString& file, const QByteArray& chunk, int index )
+SpeedyShare::OnFileReceiveProgress( QString file, const QByteArray& chunk, int index )
 {
 	Q_ASSERT(this->fileReceiveMap[index].contains(file));
 
@@ -218,7 +221,7 @@ SpeedyShare::OnFileReceiveProgress( const QString& file, const QByteArray& chunk
 /**
 */
 void 
-SpeedyShare::OnFileReceiveStarted( const QString& file, int chunks, int index )
+SpeedyShare::OnFileReceiveStarted( QString file, int chunks, int index )
 {
 	Q_ASSERT(this->fileReceiveMap[index].contains(file));
 
@@ -243,7 +246,7 @@ SpeedyShare::OnFileReceiveStarted( const QString& file, int chunks, int index )
 /**
 */
 void 
-SpeedyShare::OnFileSendDone( const QString& file )
+SpeedyShare::OnFileSendDone( QString file )
 {
 	Q_ASSERT(this->fileSendMap.contains(file));
 
@@ -267,7 +270,7 @@ SpeedyShare::OnFileSendDone( const QString& file )
 /**
 */
 void 
-SpeedyShare::OnFileSendProgress( const QString& file, int numBytes )
+SpeedyShare::OnFileSendProgress( QString file, int numBytes )
 {
 	Q_ASSERT(this->fileSendMap.contains(file));
 
@@ -280,7 +283,7 @@ SpeedyShare::OnFileSendProgress( const QString& file, int numBytes )
 /**
 */
 void 
-SpeedyShare::OnFileSendStarted( const QString& file, int chunks )
+SpeedyShare::OnFileSendStarted( QString file, int chunks )
 {
 	Q_ASSERT(this->fileSendMap.contains(file));
 
@@ -333,8 +336,8 @@ SpeedyShare::OnSendPressed()
 					QProgressBar* bar = new QProgressBar(this);
 					QLabel* label = new QLabel(this);
 
-					this->ui.downloadLayout->addWidget(bar);
-					this->ui.downloadLayout->addWidget(label);
+					this->ui.uploadLayout->addWidget(bar);
+					this->ui.uploadLayout->addWidget(label);
 					this->fileSendMap[file] = fileHandle;
 					this->progressSendMap[file] = bar;
 					this->labelSendMap[file] = label;
