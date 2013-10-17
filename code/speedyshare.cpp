@@ -185,7 +185,9 @@ SpeedyShare::OnFileReceiveDone( QString file, int index )
 	delete label;
 
 	// update text
-	label->setText("Writing: " + file + " to file...");
+	QString msg;
+	msg.sprintf("Writing %s to file", file.toUtf8().constData());
+	label->setText(msg);
 	QApplication::processEvents();
 
 	// get file handle
@@ -202,7 +204,7 @@ SpeedyShare::OnFileReceiveDone( QString file, int index )
 //------------------------------------------------------------------------------
 /**
 */
-void 
+void
 SpeedyShare::OnFileReceiveProgress( QString file, const QByteArray& chunk, int index )
 {
 	Q_ASSERT(this->fileReceiveMap[index].contains(file));
@@ -220,7 +222,7 @@ SpeedyShare::OnFileReceiveProgress( QString file, const QByteArray& chunk, int i
 //------------------------------------------------------------------------------
 /**
 */
-void 
+void
 SpeedyShare::OnFileReceiveStarted( QString file, int chunks, int index )
 {
 	Q_ASSERT(this->fileReceiveMap[index].contains(file));
@@ -231,7 +233,7 @@ SpeedyShare::OnFileReceiveStarted( QString file, int chunks, int index )
 
 	// get progress bar
 	QProgressBar* bar = this->progressReceiveMap[index][file];
-	
+
 	// rescale progress bar
 	bar->setMinimum(0);
 	bar->setMaximum(chunks);
@@ -245,7 +247,7 @@ SpeedyShare::OnFileReceiveStarted( QString file, int chunks, int index )
 //------------------------------------------------------------------------------
 /**
 */
-void 
+void
 SpeedyShare::OnFileSendDone( QString file )
 {
 	Q_ASSERT(this->fileSendMap.contains(file));
@@ -269,7 +271,7 @@ SpeedyShare::OnFileSendDone( QString file )
 //------------------------------------------------------------------------------
 /**
 */
-void 
+void
 SpeedyShare::OnFileSendProgress( QString file, int numBytes )
 {
 	Q_ASSERT(this->fileSendMap.contains(file));
