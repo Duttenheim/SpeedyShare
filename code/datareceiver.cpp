@@ -58,10 +58,10 @@ DataReceiver::Update()
 		this->connections.append(newSocket);
 
 		DataReceiverHandler* dataHandler = new DataReceiverHandler(newSocket);
-		connect(dataHandler, SIGNAL(NewRequest(QString)), this, SLOT(OnFileRequested(QString)));
-		connect(dataHandler, SIGNAL(TransactionDone(QString)), this, SLOT(OnFileDone(QString)));
-		connect(dataHandler, SIGNAL(TransactionProgress(QString, const QByteArray&)), this, SLOT(OnFileProgress(QString, const QByteArray&)));
-		connect(dataHandler, SIGNAL(TransactionStarted(QString, int)), this, SLOT(OnFileStart(QString, int)));
+		connect(dataHandler, SIGNAL(NewRequest(const QString&)), this, SLOT(OnFileRequested(const QString&)));
+		connect(dataHandler, SIGNAL(TransactionDone(const QString&)), this, SLOT(OnFileDone(const QString&)));
+		connect(dataHandler, SIGNAL(TransactionProgress(const QString&, const QByteArray&)), this, SLOT(OnFileProgress(const QString&, const QByteArray&)));
+		connect(dataHandler, SIGNAL(TransactionStarted(const QString&, int)), this, SLOT(OnFileStart(const QString&, int)));
 		this->dataHandlers.append(dataHandler);
 	}
 
@@ -92,7 +92,7 @@ DataReceiver::OnConnectionDied()
 /**
 */
 void 
-DataReceiver::OnFileRequested( QString file )
+DataReceiver::OnFileRequested( const QString& file )
 {
 	// get handler
 	DataReceiverHandler* handler = static_cast<DataReceiverHandler*>(this->sender());
@@ -104,7 +104,7 @@ DataReceiver::OnFileRequested( QString file )
 /**
 */
 void 
-DataReceiver::OnFileDone( QString file )
+DataReceiver::OnFileDone( const QString& file )
 {
 	// get handler
 	DataReceiverHandler* handler = static_cast<DataReceiverHandler*>(this->sender());
@@ -116,7 +116,7 @@ DataReceiver::OnFileDone( QString file )
 /**
 */
 void 
-DataReceiver::OnFileStart( QString file, int chunks )
+DataReceiver::OnFileStart( const QString& file, int chunks )
 {
 	// get handler
 	DataReceiverHandler* handler = static_cast<DataReceiverHandler*>(this->sender());
@@ -128,7 +128,7 @@ DataReceiver::OnFileStart( QString file, int chunks )
 /**
 */
 void 
-DataReceiver::OnFileProgress( QString file, const QByteArray& chunk )
+DataReceiver::OnFileProgress( const QString& file, const QByteArray& chunk )
 {
 	// get handler
 	DataReceiverHandler* handler = static_cast<DataReceiverHandler*>(this->sender());
@@ -140,7 +140,7 @@ DataReceiver::OnFileProgress( QString file, const QByteArray& chunk )
 /**
 */
 void 
-DataReceiver::OnAcceptFile( QString file, int index )
+DataReceiver::OnAcceptFile( const QString& file, int index )
 {
 	// get thread
 	DataReceiverHandler* dataHandler = this->dataHandlers[index];
@@ -151,7 +151,7 @@ DataReceiver::OnAcceptFile( QString file, int index )
 /**
 */
 void 
-DataReceiver::OnDenyFile( QString file, int index )
+DataReceiver::OnDenyFile( const QString& file, int index )
 {
 	// get thread
 	DataReceiverHandler* dataHandler = this->dataHandlers[index];
