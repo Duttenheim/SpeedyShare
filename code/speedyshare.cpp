@@ -140,6 +140,7 @@ SpeedyShare::OnFileRequested(const QString& file, int index)
 		QFileDialog dialog;
 		dialog.setFileMode(QFileDialog::AnyFile);
 		dialog.setAcceptMode(QFileDialog::AcceptSave);
+		dialog.selectFile(file);
 
 		result = dialog.exec();
 
