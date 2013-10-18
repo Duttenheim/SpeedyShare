@@ -230,10 +230,6 @@ SpeedyShare::OnFileReceiveStarted( const QString& file, int chunks, int index )
 	Q_ASSERT(this->fileReceiveMap[index].contains(file));
 
 	// get progress bar
-	QProgressBar* progressBar = this->progressReceiveMap[index][file];
-	progressBar->setMaximum(chunks);
-
-	// get progress bar
 	QProgressBar* bar = this->progressReceiveMap[index][file];
 
 	// rescale progress bar

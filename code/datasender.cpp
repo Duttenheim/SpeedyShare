@@ -3,7 +3,6 @@
 #include <QDataStream>
 
 #define MAXPACKAGESIZE 65535
-#define MAXFILECHUNKSIZE 131072
 
 //------------------------------------------------------------------------------------
 /**
@@ -119,10 +118,10 @@ DataSender::OnRead()
 
 			// get file
 			QFile* fileHandle = package.GetFile();
-			int dataSize = fileHandle->size();
+			quint64 dataSize = fileHandle->size();
 
 			// split package into smaller packages
-			int numPackages = (dataSize / MAXPACKAGESIZE) + 1;
+			qint32 numPackages = (dataSize / MAXPACKAGESIZE) + 1;
 
 			// create new header
 			QByteArray dataPackage;
@@ -147,19 +146,25 @@ DataSender::OnRead()
 			int i;
 			for (i = 0; i < numPackages; i++)
 			{
+				// clear package for next loop
+				dataPackage.clear();	
+
 				QByteArray fileData = fileHandle->read(MAXPACKAGESIZE);
-				int packageSize = qMin(MAXPACKAGESIZE, fileData.size() - i * MAXPACKAGESIZE);
+				qint32 packageSize = qMin(MAXPACKAGESIZE, fileData.size());
+
+				// send size first
+				this->write((char*)&packageSize, sizeof(qint32));
+				this->waitForBytesWritten(-1);
+				
+				// then package the actual data
 				dataPackage.append(fileData);
 
 				// write package
-				this->write(dataPackage);
+				this->write(dataPackage.constData(), packageSize);
 				this->waitForBytesWritten(-1);
 
 				// trigget data progress
-				emit FileProgress(package.GetName(), packageSize);
-
-				// clear package for next loop
-				dataPackage.clear();			
+				emit FileProgress(package.GetName(), packageSize);		
 			}
 
 			// close file

@@ -78,11 +78,30 @@ DataReceiverHandler::Read()
 		emit this->TransactionStarted(file, numPackages);
 		QApplication::processEvents();
 
-		while(this->socket->waitForReadyRead(3000))
+		int i;
+		for (i = 0; i < numPackages; i++)
 		{
-			QByteArray chunk = this->socket->readAll();
+			// wait until we can read the package size
+			while (this->socket->bytesAvailable() < sizeof(qint32))
+			{
+				QApplication::processEvents();
+			}
+
+			// read size of package
+			qint32 size;
+			this->socket->read((char*)&size, sizeof(qint32));
+
+			// wait until the package can be read
+			while (this->socket->bytesAvailable() < size)
+			{
+				QApplication::processEvents();
+			}
+
+			// read chunk
+			QByteArray chunk = this->socket->read(size);
 			emit this->TransactionProgress(file, chunk);
 		}
+
 
 		// stop transaction
 		emit this->TransactionDone(file);
