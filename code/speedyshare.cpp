@@ -229,6 +229,9 @@ void
 SpeedyShare::OnFileReceiveStarted( const QString& file, int chunks, int index )
 {
 	Q_ASSERT(this->fileReceiveMap[index].contains(file));
+	
+	// get file handle
+	QFile* fileHandle = this->fileReceiveMap[index][file];
 
 	// get progress bar
 	QProgressBar* bar = this->progressReceiveMap[index][file];
@@ -240,7 +243,8 @@ SpeedyShare::OnFileReceiveStarted( const QString& file, int chunks, int index )
 
 	// set text of label
 	QLabel* label = this->labelReceiveMap[index][file];
-	label->setText("Downloading: " + file);
+	label->setTextFormat(Qt::RichText);
+	label->setText("Downloading: " + file + "<br><b>to:</b><br>" + fileHandle->fileName());
 }
 
 //------------------------------------------------------------------------------

@@ -1,6 +1,5 @@
 #include "datasender.h"
-
-#define MAXPACKAGESIZE 65535
+#include "config.h"
 
 //------------------------------------------------------------------------------------
 /**

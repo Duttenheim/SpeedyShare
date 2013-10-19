@@ -7,8 +7,7 @@
 #endif
 
 #include <QtNetwork/QHostAddress>
-
-#define MAXPACKAGESIZE 65535
+#include "config.h"
 
 //------------------------------------------------------------------------------
 /**
