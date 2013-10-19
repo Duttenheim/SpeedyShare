@@ -29,7 +29,7 @@ int WINAPI WinMain( __in HINSTANCE hInstance, __in_opt HINSTANCE hPrevInstance, 
 //------------------------------------------------------------------------------------
 /**
 */
-int __cdecl
+int
 main(int argc, char** argv)
 {
 	qRegisterMetaType<FilePackage>("FilePackage");
