@@ -78,6 +78,10 @@ SpeedyShare::closeEvent( QCloseEvent* e )
 	// close receiver
 	this->receiverThread.Stop();
 	this->senderThread.Stop();
+	
+	// wait for threads to die
+	while (this->receiverThread.isRunning());
+	while (this->senderThread.isRunning());
 }
 
 //------------------------------------------------------------------------------
