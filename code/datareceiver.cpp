@@ -8,6 +8,7 @@
 
 #include <QtNetwork/QTcpSocket>
 #include <QtNetwork/QNetworkProxy>
+#include "config.h"
 
 //------------------------------------------------------------------------------
 /**
@@ -31,7 +32,7 @@ DataReceiver::~DataReceiver(void)
 bool 
 DataReceiver::Open()
 {
-	return this->listen(QHostAddress::Any, 1467);
+	return this->listen(QHostAddress::Any, MAINPORT);
 }
 
 //------------------------------------------------------------------------------
@@ -49,6 +50,7 @@ DataReceiver::Close()
 void 
 DataReceiver::Update()
 {
+	// poll incoming connections
 	if (this->waitForNewConnection(0))
 	{
 		// get socket
@@ -64,6 +66,7 @@ DataReceiver::Update()
 		this->dataHandlers.append(dataHandler);
 	}
 
+	// update connections
 	int i;
 	for (i = 0; i < this->dataHandlers.size(); i++)
 	{
@@ -141,7 +144,7 @@ DataReceiver::OnFileProgress( const QString& file, const QByteArray& chunk )
 void 
 DataReceiver::OnAcceptFile( const QString& file, int index )
 {
-	// get thread
+	// pass through the notification
 	DataReceiverHandler* dataHandler = this->dataHandlers[index];
 	dataHandler->OnAcceptFile(file);
 }
@@ -152,7 +155,7 @@ DataReceiver::OnAcceptFile( const QString& file, int index )
 void 
 DataReceiver::OnDenyFile( const QString& file, int index )
 {
-	// get thread
+	// pass through the notification
 	DataReceiverHandler* dataHandler = this->dataHandlers[index];
 	dataHandler->OnDenyFile(file);
 }

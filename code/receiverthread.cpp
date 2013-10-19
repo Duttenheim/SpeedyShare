@@ -54,6 +54,7 @@ ReceiverThread::run()
 	// open receiver
 	bool isListening = this->receiver->Open();
 
+	// run receiver thread loop
 	while(!this->shouldStop)
 	{
 		this->receiver->Update();

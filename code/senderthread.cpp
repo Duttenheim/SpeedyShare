@@ -73,6 +73,7 @@ SenderThread::run()
 	this->sender->SetPort(this->port);
 	this->sender->Open();
 	
+	// execute sender thread loop
 	while(!this->shouldStop)
 	{
 		if (this->connectionOpen)

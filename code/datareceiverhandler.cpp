@@ -42,13 +42,13 @@ DataReceiverHandler::Kill()
 void 
 DataReceiverHandler::Update()
 {
-	// read stuff, this differs from the sender because for some reason incoming sockets needs to wait for a ready read...
+	// read incoming messages, this differs from the sender because for some reason incoming sockets needs to wait for a ready read upon each read...
 	if (this->socket->waitForReadyRead(0))
 	{
 		this->Read();
 	}
 
-	// write stuff
+	// write pending messages
 	this->Write();
 }
 

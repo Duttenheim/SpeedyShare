@@ -7,6 +7,7 @@
 #endif
 
 #include <QtNetwork/QNetworkProxy>
+#include "config.h"
 
 //------------------------------------------------------------------------------
 /**
@@ -21,7 +22,7 @@ SpeedyShare::SpeedyShare(QWidget *parent, Qt::WindowFlags flags) :
 	// setup file dialog
 	this->fileDialog.setAcceptMode(QFileDialog::AcceptOpen);
 	this->fileDialog.setFileMode(QFileDialog::ExistingFiles);
-
+	this->dialogUi.port->setValue(MAINPORT);
 
 	connect(this->ui.connectButton, SIGNAL(pressed()), this, SLOT(OnConnectPressed()));
 	connect(this->ui.sendButton, SIGNAL(pressed()), this, SLOT(OnSendPressed()));
@@ -382,6 +383,5 @@ SpeedyShare::OnSendPressed()
 				qErrnoWarning("Could not open file: %s/n", file.toUtf8().constData());
 			}			
 		}
-		
 	}
 }
