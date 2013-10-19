@@ -5,7 +5,9 @@
 #else
 #include <QtGui/QApplication>
 #endif
-#include <QDataStream>
+
+#include <QtNetwork/QHostAddress>
+
 #define MAXPACKAGESIZE 65535
 
 //------------------------------------------------------------------------------
@@ -14,6 +16,7 @@
 DataReceiverHandler::DataReceiverHandler( QTcpSocket* socket )
 {
 	this->socket = socket;
+	this->stream.setDevice(socket);
 }
 
 //------------------------------------------------------------------------------
@@ -40,10 +43,14 @@ DataReceiverHandler::Kill()
 void 
 DataReceiverHandler::Update()
 {
+	// read stuff, this differs from the sender because for some reason incoming sockets needs to wait for a ready read...
 	if (this->socket->waitForReadyRead(0))
 	{
 		this->Read();
 	}
+
+	// write stuff
+	this->Write();
 }
 
 //------------------------------------------------------------------------------
@@ -52,27 +59,24 @@ DataReceiverHandler::Update()
 void 
 DataReceiverHandler::Read()
 {
-	// create data stream
-	QDataStream stream(this->socket);
-
 	// read int
 	qint32 magic;
-	stream >> magic;
+	this->stream >> magic;
 
 	// get name
 	QString file;
-	stream >> file;
+	this->stream >> file;
 
 	if (magic == 'REQF')
 	{
 		this->pendingFiles.append(file);
-		emit NewRequest(file);
+		emit NewRequest(file, this->socket->peerAddress().toString());
 	}
 	else if (magic == 'PACK')
 	{
 		// read number of packages
 		qint32 numPackages;
-		stream >> numPackages;
+		this->stream >> numPackages;
 
 		// start transaction
 		emit this->TransactionStarted(file, numPackages);
@@ -109,6 +113,23 @@ DataReceiverHandler::Read()
 	}
 }
 
+
+//------------------------------------------------------------------------------
+/**
+*/
+void 
+DataReceiverHandler::Write()
+{
+	if (this->messages.size() > 0) do
+	{
+		const QByteArray& data = this->messages[0];
+		this->socket->write(data);
+		this->socket->waitForBytesWritten(-1);
+		this->messages.removeFirst();
+	} 
+	while (this->messages.size() > 0);
+}
+
 //------------------------------------------------------------------------------
 /**
 */
@@ -131,10 +152,8 @@ DataReceiverHandler::OnAcceptFile( const QString& file )
 	stream << file;
 
 	// send answer
-	qint32 written = this->socket->write(package);
-	this->socket->flush();
+	this->messages.append(package);
 }
-
 
 //------------------------------------------------------------------------------
 /**
@@ -158,6 +177,5 @@ DataReceiverHandler::OnDenyFile( const QString& file )
 	stream << file;
 
 	// send answer
-	this->socket->write(package);
-	this->socket->flush();
+	this->messages.append(package);
 }

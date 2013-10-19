@@ -9,8 +9,7 @@
 	Thread which sends data
 */
 //------------------------------------------------------------------------------------
-class SenderThread :
-	public QThread
+class SenderThread : public QThread
 {
 	Q_OBJECT
 public:
@@ -38,8 +37,6 @@ public:
 	/// stops thread
 	void Stop();
 
-
-
 public slots:
 	/// called whenever the data sender is connected
 	void OnConnected();
@@ -47,6 +44,8 @@ public slots:
 	void OnDisconnected();
 
 private slots:
+	/// called whenever a file gets denied to be sent
+	void OnFileDenied(const QString& file);
 	/// called whenever a file is done
 	void OnFileDone(const QString& file);
 	/// called whenever a file progress is done
@@ -60,6 +59,8 @@ signals:
 	/// emit when connection is killed
 	void Disconnected();
 
+	/// emitted when a file is denied
+	void FileDenied(const QString& file);
 	/// emitted when a file is done
 	void FileDone(const QString& file);
 	/// emitted when a file progress is done

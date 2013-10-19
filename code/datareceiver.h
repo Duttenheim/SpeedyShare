@@ -35,7 +35,7 @@ private slots:
 	/// called whenever a connection dies
 	void OnConnectionDied();
 	/// called whenever a file gets requested
-	void OnFileRequested(const QString& file);
+	void OnFileRequested(const QString& file, const QString& peer);
 	/// called whenever a file transaction is done
 	void OnFileDone(const QString& file);
 	/// called from handler when progress is performed
@@ -44,7 +44,7 @@ private slots:
 	void OnFileProgress(const QString& file, const QByteArray& chunk);
 signals:
 	/// called whenever a new file transaction is ready
-	void NewRequest(const QString& name, int index);
+	void NewRequest(const QString& name, const QString& peer, int index);
 	/// called whenever a new connection is established
 	void FileDone(const QString& file, int index);
 	/// emitted when a file has started downloading

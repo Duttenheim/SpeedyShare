@@ -1,6 +1,4 @@
 #include "datasender.h"
-#include <QSslSocket>
-#include <QDataStream>
 
 #define MAXPACKAGESIZE 65535
 
@@ -30,6 +28,9 @@ DataSender::Open()
 	// open connection
 	this->connectToHost(this->address, this->port, QIODevice::ReadWrite);
 
+	// setup stream
+	this->stream.setDevice(this);
+
 	// wait until connection occurs
 	return this->waitForConnected(1000);
 }
@@ -50,10 +51,14 @@ DataSender::Close()
 void 
 DataSender::Update()
 {
-	if (this->waitForReadyRead(0))
+	// read stuff if we have bytes waiting, do not do waitForReadyRead here since it will only be true once for some reason...
+	qint32 available = this->bytesAvailable();
+	if (available > 0)
 	{
-		this->OnRead();
+		this->Read();
 	}	
+
+	this->Write();
 }
 
 //------------------------------------------------------------------------------
@@ -82,9 +87,8 @@ DataSender::Send( const FilePackage& data )
 		// add to pending packages
 		this->pendingPackages[name] = data;
 
-		// write message
-		this->write(message);
-		this->flush();
+		// add message to queue
+		this->messages.append(message);
 	}
 }
 
@@ -92,28 +96,26 @@ DataSender::Send( const FilePackage& data )
 /**
 */
 void 
-DataSender::OnRead()
+DataSender::Read()
 {
-	// read bytes
-	QDataStream stream(this);
-
 	// read magic
 	qint32 magic;
-	stream >> magic;
+	this->stream >> magic;
 
 	if (magic == 'ACPF')
 	{
 		// get response
 		bool answer;
-		stream >> answer;
+		this->stream >> answer;
 
 		// get file name
 		QString name;
-		stream >> name;
+		this->stream >> name;
 
 		if (answer)
 		{
 			// get package
+			Q_ASSERT(this->pendingPackages.contains(name));
 			FilePackage package = this->pendingPackages[name];		
 
 			// get file
@@ -167,6 +169,9 @@ DataSender::OnRead()
 				emit FileProgress(package.GetName(), packageSize);		
 			}
 
+			// remove pending package
+			this->pendingPackages.remove(name);
+
 			// close file
 			fileHandle->close();
 
@@ -175,7 +180,24 @@ DataSender::OnRead()
 		}
 		else
 		{
-			// do nothing, the send was denied
+			// emit that the file should not be sent
+			emit FileDenied(name);
 		}
 	}
+}
+
+//------------------------------------------------------------------------------
+/**
+*/
+void 
+DataSender::Write()
+{
+	if (this->messages.size() > 0) do
+	{
+		const QByteArray& data = this->messages[0];
+		this->write(data);
+		this->waitForBytesWritten(-1);
+		this->messages.removeFirst();
+	} 
+	while (this->messages.size() > 0);
 }

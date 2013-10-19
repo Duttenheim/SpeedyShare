@@ -53,12 +53,11 @@ DataReceiver::Update()
 	{
 		// get socket
 		QTcpSocket* newSocket = this->nextPendingConnection();
-		newSocket->setReadBufferSize(0);
 		connect(newSocket, SIGNAL(disconnected()), this, SLOT(OnConnectionDied()));
 		this->connections.append(newSocket);
 
 		DataReceiverHandler* dataHandler = new DataReceiverHandler(newSocket);
-		connect(dataHandler, SIGNAL(NewRequest(const QString&)), this, SLOT(OnFileRequested(const QString&)));
+		connect(dataHandler, SIGNAL(NewRequest(const QString&, const QString&)), this, SLOT(OnFileRequested(const QString&, const QString&)));
 		connect(dataHandler, SIGNAL(TransactionDone(const QString&)), this, SLOT(OnFileDone(const QString&)));
 		connect(dataHandler, SIGNAL(TransactionProgress(const QString&, const QByteArray&)), this, SLOT(OnFileProgress(const QString&, const QByteArray&)));
 		connect(dataHandler, SIGNAL(TransactionStarted(const QString&, int)), this, SLOT(OnFileStart(const QString&, int)));
@@ -92,12 +91,12 @@ DataReceiver::OnConnectionDied()
 /**
 */
 void 
-DataReceiver::OnFileRequested( const QString& file )
+DataReceiver::OnFileRequested( const QString& file, const QString& peer )
 {
 	// get handler
 	DataReceiverHandler* handler = static_cast<DataReceiverHandler*>(this->sender());
 	int index = this->dataHandlers.indexOf(handler);
-	emit this->NewRequest(file, index);
+	emit this->NewRequest(file, peer, index);
 }
 
 //------------------------------------------------------------------------------

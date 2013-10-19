@@ -4,6 +4,7 @@
 #include <QHostAddress>
 #include <QByteArray>
 #include <QQueue>
+#include <QDataStream>
 #include "filepackage.h"
 
 //------------------------------------------------------------------------------------
@@ -38,9 +39,13 @@ public:
 	void SetPort(const quint16 port);
 
 	/// called whenever there is anything to read
-	void OnRead();
+	void Read();
+	/// called to update outgoing messages
+	void Write();
 
 signals:
+	/// called when the file is denied
+	void FileDenied(const QString& file);
 	/// called whenever a new connection is established
 	void FileDone(const QString& file);
 	/// emitted when a file has started downloading
@@ -48,6 +53,8 @@ signals:
 	/// emitted when a file is progressing
 	void FileProgress(const QString& file, int numBytes);
 private:
+	QDataStream stream;
+	QList<QByteArray> messages;
 	QMap<QString, FilePackage> pendingPackages;
 	QHostAddress address;
 	quint16 port;

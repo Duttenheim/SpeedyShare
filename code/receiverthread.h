@@ -7,8 +7,7 @@
 	Thread which receives data
 */
 //------------------------------------------------------------------------------------
-class ReceiverThread :
-	public QThread
+class ReceiverThread : public QThread
 {
 	Q_OBJECT
 public:
@@ -29,7 +28,7 @@ public slots:
 	void OnFileDenied(const QString& file, int index);
 private slots:
 	/// called whenever a file is requested
-	void OnFileRequested(const QString& file, int index);
+	void OnFileRequested(const QString& file, const QString& peer, int index);
 	/// called whenever a file is done
 	void OnFileDone(const QString& file, int index);
 	/// called whenever a file progress is done
@@ -38,7 +37,7 @@ private slots:
 	void OnFileStarted(const QString& file, int chunks, int index);
 signals:
 	/// emitted when a file is requested
-	void FileRequested(const QString& file, int index);
+	void FileRequested(const QString& file, const QString& peer, int index);
 	/// emitted when a file is done
 	void FileDone(const QString& file, int index);
 	/// emitted when a file progress is done

@@ -43,7 +43,7 @@ public slots:
 	/// called whenever the sender is disconnected
 	void OnSenderDisconnected();
 	/// called whenever a file is requested
-	void OnFileRequested(const QString& file, int index);
+	void OnFileRequested(const QString& file, const QString& peer, int index);
 
 	/// called whenever a file is done
 	void OnFileReceiveDone(const QString& file, int index);
@@ -52,6 +52,8 @@ public slots:
 	/// called whenever a file progress is done
 	void OnFileReceiveStarted(const QString& file, int chunks, int index);
 
+	/// called whenever the receiver denies a file
+	void OnFileDenied(const QString& file);
 	/// called whenever a file is done
 	void OnFileSendDone(const QString& file);
 	/// called when a file is progressing

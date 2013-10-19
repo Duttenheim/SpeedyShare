@@ -63,6 +63,7 @@ SenderThread::run()
 	connect(this->sender, SIGNAL(disconnected()), this, SLOT(OnDisconnected()));
 
 	// connect data sent signal
+	connect(this->sender, SIGNAL(FileDenied(const QString&)), this, SLOT(OnFileDenied(const QString&)));
 	connect(this->sender, SIGNAL(FileStarted(const QString&, int)), this, SLOT(OnFileStarted(const QString&, int)));
 	connect(this->sender, SIGNAL(FileDone(const QString&)), this, SLOT(OnFileDone(const QString&)));
 	connect(this->sender, SIGNAL(FileProgress(const QString&, int)), this, SLOT(OnFileProgress(const QString&, int)));
@@ -87,7 +88,7 @@ SenderThread::run()
 		}
 		QApplication::processEvents();
 		QThread::yieldCurrentThread();
-		QThread::msleep(500);
+		QThread::msleep(5);
 	}
 
 	this->shouldStop = false;
@@ -118,6 +119,15 @@ SenderThread::OnDisconnected()
 	this->quit();
 	this->connectionOpen = false;
 	emit Disconnected();
+}
+
+//------------------------------------------------------------------------------
+/**
+*/
+void 
+SenderThread::OnFileDenied( const QString& file )
+{
+	emit FileDenied(file);
 }
 
 //------------------------------------------------------------------------------

@@ -46,7 +46,7 @@ ReceiverThread::run()
 	this->receiver = new DataReceiver;
 
 	// connect
-	connect(this->receiver, SIGNAL(NewRequest(const QString&, int)), this, SLOT(OnFileRequested(const QString&, int)));
+	connect(this->receiver, SIGNAL(NewRequest(const QString&, const QString&, int)), this, SLOT(OnFileRequested(const QString&, const QString&, int)));
 	connect(this->receiver, SIGNAL(FileDone(const QString&, int)), this, SLOT(OnFileDone(const QString&, int)));
 	connect(this->receiver, SIGNAL(FileProgress(const QString&, const QByteArray&, int)), this, SLOT(OnFileProgress(const QString&, const QByteArray&, int)));
 	connect(this->receiver, SIGNAL(FileStarted(const QString&, int, int)), this, SLOT(OnFileStarted(const QString&, int, int)));
@@ -58,7 +58,7 @@ ReceiverThread::run()
 	{
 		this->receiver->Update();
 		QThread::yieldCurrentThread();
-		QThread::msleep(500);
+		QThread::msleep(5);
 	}
 
 	this->shouldStop = false;
@@ -74,9 +74,9 @@ ReceiverThread::run()
 /**
 */
 void 
-ReceiverThread::OnFileRequested( const QString& file, int index )
+ReceiverThread::OnFileRequested( const QString& file, const QString& peer, int index )
 {
-	emit this->FileRequested(file, index);
+	emit this->FileRequested(file, peer, index);
 }
 
 //------------------------------------------------------------------------------
