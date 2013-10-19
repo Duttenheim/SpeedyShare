@@ -5,7 +5,7 @@
 /**
 */
 DataSender::DataSender(void) :
-	port(1467)
+	port(MAINPORT)
 {
 	// empty
 }
@@ -50,13 +50,14 @@ DataSender::Close()
 void 
 DataSender::Update()
 {
-	// read stuff if we have bytes waiting, do not do waitForReadyRead here since it will only be true once for some reason...
+	// read incoming messages if we have bytes waiting, do not do waitForReadyRead here since it will only be true once for some reason...
 	qint32 available = this->bytesAvailable();
 	if (available > 0)
 	{
 		this->Read();
 	}	
 
+	// write pending messages
 	this->Write();
 }
 

@@ -7,6 +7,10 @@
 #endif
 
 #include <QtNetwork/QNetworkProxy>
+#include <QtNetwork/QHostInfo>
+#include <QtNetwork/QHostAddress>
+#include <QtNetwork/QNetworkInterface>
+#include <QList>
 #include "config.h"
 
 //------------------------------------------------------------------------------
@@ -24,6 +28,7 @@ SpeedyShare::SpeedyShare(QWidget *parent, Qt::WindowFlags flags) :
 	this->fileDialog.setFileMode(QFileDialog::ExistingFiles);
 	this->dialogUi.port->setValue(MAINPORT);
 
+	// connect signals for threads
 	connect(this->ui.connectButton, SIGNAL(pressed()), this, SLOT(OnConnectPressed()));
 	connect(this->ui.sendButton, SIGNAL(pressed()), this, SLOT(OnSendPressed()));
 	connect(&this->receiverThread, SIGNAL(FileRequested(const QString&, const QString&, int)), this, SLOT(OnFileRequested(const QString&, const QString&, int)));
@@ -39,6 +44,18 @@ SpeedyShare::SpeedyShare(QWidget *parent, Qt::WindowFlags flags) :
 	connect(&this->senderThread, SIGNAL(FileDone(const QString&)), this, SLOT(OnFileSendDone(const QString&)));
 	connect(&this->senderThread, SIGNAL(FileProgress(const QString&, int)), this, SLOT(OnFileSendProgress(const QString&, int)));
 	connect(&this->senderThread, SIGNAL(FileStarted(const QString&, int)), this, SLOT(OnFileSendStarted(const QString&, int)));
+
+	// connect to Google DNS to resolve local IP
+	QTcpSocket socket;
+	socket.connectToHost("8.8.8.8", 53);
+	if (socket.waitForConnected())
+	{
+		this->ui.ipLabel->setText("Local IP: " + socket.localAddress().toString());
+	}
+	else
+	{
+		this->ui.ipLabel->setText("No internet access");
+	}
 
 	// open receiver
 	this->receiverThread.Start();
@@ -124,6 +141,7 @@ SpeedyShare::OnSenderDisconnected()
 	this->ui.statusLabel->setText("Not connected");
 	this->ui.sendButton->setEnabled(false);
 	this->isConnected = false;
+	this->senderThread.Stop();
 }
 
 //------------------------------------------------------------------------------

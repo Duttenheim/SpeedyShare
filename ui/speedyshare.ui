@@ -10,7 +10,7 @@
     <x>0</x>
     <y>0</y>
     <width>600</width>
-    <height>196</height>
+    <height>215</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -101,9 +101,19 @@
          </widget>
         </item>
         <item>
+         <widget class="QLabel" name="ipLabel">
+          <property name="text">
+           <string>TextLabel</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignCenter</set>
+          </property>
+         </widget>
+        </item>
+        <item>
          <widget class="QLabel" name="label_3">
           <property name="text">
-           <string>&lt;a href=&quot;http://www.whatismyip.org&quot;&gt; Get my IP&lt;/a&gt; (opens browser)</string>
+           <string>&lt;a href=&quot;http://www.whatismyip.org&quot;&gt; Get public IP&lt;/a&gt; (opens browser)</string>
           </property>
           <property name="textFormat">
            <enum>Qt::RichText</enum>
