@@ -60,6 +60,8 @@ public slots:
 	void OnFileSendProgress(const QString& file, int numBytes);
 	/// called whenever a file progress is done
 	void OnFileSendStarted(const QString& file, int chunks);
+	/// called whenever the current file is aborted
+	void OnFileSendAborted();
 
 	/// called whenever the send button is pressed
 	void OnSendPressed();
@@ -77,6 +79,7 @@ private:
 	QMap<QString, QFile*> fileSendMap;
 	QMap<QString, QProgressBar*> progressSendMap;
 	QMap<QString, QLabel*> labelSendMap;
+	QMap<QString, QPushButton*> abortSendMap;
 	bool isConnected;
 };
 

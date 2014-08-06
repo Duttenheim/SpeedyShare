@@ -37,6 +37,9 @@ public:
 	/// stops thread
 	void Stop();
 
+	/// aborts current file
+	void AbortCurrent();
+
 public slots:
 	/// called whenever the data sender is connected
 	void OnConnected();

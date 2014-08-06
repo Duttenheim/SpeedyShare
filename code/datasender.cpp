@@ -1,11 +1,13 @@
 #include "datasender.h"
 #include "config.h"
+#include <QBuffer>
 
 //------------------------------------------------------------------------------------
 /**
 */
 DataSender::DataSender(void) :
-	port(MAINPORT)
+	port(MAINPORT),
+	abortCurrent(false)
 {
 	// empty
 }
@@ -138,9 +140,6 @@ DataSender::Read()
 			this->write(dataPackage);
 			this->waitForBytesWritten(-1);
 
-			// clear package
-			dataPackage.clear();
-
 			// trigger data send start
 			emit FileStarted(package.GetName(), numPackages);
 
@@ -148,25 +147,49 @@ DataSender::Read()
 			int i;
 			for (i = 0; i < numPackages; i++)
 			{
-				// clear package for next loop
-				dataPackage.clear();	
+				// clear package and reset stream for next loop
+				dataPackage.clear();					
+				dataStream.device()->reset();
 
-				QByteArray fileData = fileHandle->read(MAXPACKAGESIZE);
-				qint32 packageSize = qMin(MAXPACKAGESIZE, fileData.size());
+				if (!this->abortCurrent)
+				{
+					QByteArray fileData = fileHandle->read(MAXPACKAGESIZE);
+					qint32 packageSize = qMin(MAXPACKAGESIZE, fileData.size());
 
-				// send size first
-				this->write((char*)&packageSize, sizeof(qint32));
-				this->waitForBytesWritten(-1);
-				
-				// then package the actual data
-				dataPackage.append(fileData);
+					// reset data stream, then send chunk header				
+					dataStream << 'CHNK';
+					dataStream << packageSize;
 
-				// write package
-				this->write(dataPackage.constData(), packageSize);
-				this->waitForBytesWritten(-1);
+					// send type and size
+					this->write(dataPackage);
+					this->waitForBytesWritten(-1);
 
-				// trigget data progress
-				emit FileProgress(package.GetName(), packageSize);		
+					// clear package
+					dataPackage.clear();
+
+					// then package the actual data
+					dataPackage.append(fileData);
+
+					// write package, restrict size to only write MAXPACKAGESIZE or less bytes
+					this->write(dataPackage.constData(), packageSize);
+					this->waitForBytesWritten(-1);
+
+					// trigger data progress
+					emit FileProgress(package.GetName(), packageSize);
+				}
+				else
+				{
+					// flip dat bool!
+					this->abortCurrent = false;
+					dataStream << 'ABRT';
+
+					// send type
+					this->write(dataPackage);
+					this->waitForBytesWritten(-1);
+
+					// break loop
+					break;
+				}		
 			}
 
 			// remove pending package

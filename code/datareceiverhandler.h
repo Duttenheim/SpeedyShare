@@ -43,6 +43,10 @@ signals:
 	void TransactionDone(const QString& file);
 	/// emitted when a transaction has failed
 	void TransactionFailed(const QString& file);
+	/// emitted when a  transaction has been remotely aborted
+	void TransactionAborted(const QString& file);
+	/// emitted if an unknown package has been received
+	void TransactionCorrupted(const QString& file);
 private:
 	bool stopRequested;
 	QTcpSocket* socket;

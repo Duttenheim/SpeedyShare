@@ -316,6 +316,11 @@ SpeedyShare::OnFileSendDone( const QString& file )
 	QLabel* label = this->labelSendMap[file];
 	this->ui.uploadLayout->removeWidget(label);
 	delete label;
+
+	// get button
+	QPushButton* button = this->abortSendMap[file];
+	this->ui.uploadLayout->removeWidget(button);
+	delete button;
 }
 
 //------------------------------------------------------------------------------
@@ -348,6 +353,16 @@ SpeedyShare::OnFileSendStarted( const QString& file, int chunks )
 	// get label
 	QLabel* label = this->labelSendMap[file];
 	label->setText("Uploading: " + file);
+}
+
+//------------------------------------------------------------------------------
+/**
+*/
+void 
+SpeedyShare::OnFileSendAborted()
+{
+	// abort current file
+	this->senderThread.AbortCurrent();
 }
 
 //------------------------------------------------------------------------------
@@ -387,12 +402,19 @@ SpeedyShare::OnSendPressed()
 					// create UI for sender files
 					QProgressBar* bar = new QProgressBar(this);
 					QLabel* label = new QLabel(this);
+					QPushButton* button = new QPushButton(this);
+
+					// connect abort button
+					connect(button, SIGNAL(pressed()), this, SLOT(OnFileSendAborted()));
+					button->setText("Abort");
 
 					this->ui.uploadLayout->addWidget(bar);
+					this->ui.uploadLayout->addWidget(button);
 					this->ui.uploadLayout->addWidget(label);
 					this->fileSendMap[file] = fileHandle;
 					this->progressSendMap[file] = bar;
 					this->labelSendMap[file] = label;
+					this->abortSendMap[file] = button;
 				}
 				else
 				{

@@ -41,6 +41,17 @@ SenderThread::Stop()
 /**
 */
 void 
+SenderThread::AbortCurrent()
+{
+	this->mutex.lock();
+	this->sender->AbortCurrent();
+	this->mutex.unlock();
+}
+
+//------------------------------------------------------------------------------
+/**
+*/
+void 
 SenderThread::Enqueue( const FilePackage& data )
 {
 	this->mutex.lock();

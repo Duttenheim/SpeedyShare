@@ -84,31 +84,61 @@ DataReceiverHandler::Read()
 		int i;
 		for (i = 0; i < numPackages; i++)
 		{
-			// wait until we can read the package size
+			// wait until we can read package type
 			while (this->socket->bytesAvailable() < sizeof(qint32))
 			{
 				QApplication::processEvents();
 			}
 
-			// read size of package
-			qint32 size;
-			this->socket->read((char*)&size, sizeof(qint32));
+			// read package type
+			qint32 type;			
+			this->stream >> type;			
 
-			// wait until the package can be read
-			while (this->socket->bytesAvailable() < size)
+			// only read chunk if we actually have a chunk
+			if (type == 'CHNK')
 			{
-				QApplication::processEvents();
+				// wait until we can read the package size
+				while (this->socket->bytesAvailable() < sizeof(qint32))
+				{
+					QApplication::processEvents();
+				}
+
+				// read size of package
+				qint32 size;
+				this->stream >> size;
+
+				// wait until the package can be read
+				while (this->socket->bytesAvailable() < size)
+				{
+					QApplication::processEvents();
+				}
+
+				// read chunk
+				QByteArray chunk = this->socket->read(size);
+				emit this->TransactionProgress(file, chunk);
 			}
-
-			// read chunk
-			QByteArray chunk = this->socket->read(size);
-			emit this->TransactionProgress(file, chunk);
+			else if (type == 'ABRT')
+			{
+				// abort!!!
+				emit this->TransactionAborted(file);
+				break;
+			}
+			else
+			{
+				// woops, unknown FourCC means something went wrong
+				emit this->TransactionCorrupted(file);
+				break;
+			}
 		}
-
 
 		// stop transaction
 		emit this->TransactionDone(file);
 		QApplication::processEvents();
+	}
+	else
+	{
+		// woops, unknown FourCC means something went wrong
+		emit this->TransactionCorrupted(file);
 	}
 }
 

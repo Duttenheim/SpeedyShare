@@ -43,6 +43,9 @@ public:
 	/// called to update outgoing messages
 	void Write();
 
+	/// called whenever we want to abort the current file
+	void AbortCurrent();
+
 signals:
 	/// called when the file is denied
 	void FileDenied(const QString& file);
@@ -58,6 +61,7 @@ private:
 	QMap<QString, FilePackage> pendingPackages;
 	QHostAddress address;
 	quint16 port;
+	bool abortCurrent;
 };
 
 
@@ -77,4 +81,14 @@ inline void
 DataSender::SetPort( const quint16 port )
 {
 	this->port = port;
+}
+
+
+//------------------------------------------------------------------------------
+/**
+*/
+inline void 
+DataSender::AbortCurrent()
+{
+	this->abortCurrent = true;
 }
