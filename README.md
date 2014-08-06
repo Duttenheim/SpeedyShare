@@ -7,7 +7,7 @@ The way SpeedyShare works is by transmitting bytes through good old simple TCP/I
 and only uses an IP address to access the user.
 
 It still requires some work:
-  - Secure package sending, it would be nice to encrypt a package with a symmetric key. 
+  - Secure package sending, it would be nice to encrypt the traffic with a symmetric key.
   - Continuing a download which has been interrupted is currently not possible.
   - Displaying the local network in a browser would be nice.
   - Running in the background would be nice since the window isn't really necessary if one is receiving files.
