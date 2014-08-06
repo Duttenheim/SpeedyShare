@@ -11,4 +11,4 @@ It still requires some work:
   - Continuing a download which has been interrupted is currently not possible.
   - Displaying the local network in a browser would be nice.
   - Aborting the retrieval of a file doesn't remove the progress bar from the sender.
-  - Running in the background would be nice since the window isn't really necessary to have if one is receiving files.
+  - Running in the background would be nice since the window isn't really necessary if one is receiving files.
