@@ -11,7 +11,7 @@
 
 class DataReceiverHandler : public QObject
 {
-	Q_OBJECT
+        Q_OBJECT
 public:
 	/// constructor
 	DataReceiverHandler(QTcpSocket* socket);

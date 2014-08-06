@@ -16,7 +16,7 @@
 class DataSender :
 	public QTcpSocket
 {
-	Q_OBJECT
+    Q_OBJECT
 public:
 	/// constructor
 	DataSender(void);
@@ -82,7 +82,6 @@ DataSender::SetPort( const quint16 port )
 {
 	this->port = port;
 }
-
 
 //------------------------------------------------------------------------------
 /**

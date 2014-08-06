@@ -20,7 +20,8 @@ int __cdecl main(int argc, char** argv);
 /**
 	Just handle this Windows bullshit
 */
-int WINAPI WinMain( __in HINSTANCE hInstance, __in_opt HINSTANCE hPrevInstance, __in_opt LPSTR lpCmdLine, __in int nShowCmd )
+int WINAPI 
+WinMain( __in HINSTANCE hInstance, __in_opt HINSTANCE hPrevInstance, __in_opt LPSTR lpCmdLine, __in int nShowCmd )
 {
 	return main(nShowCmd, (char**)&lpCmdLine);
 }

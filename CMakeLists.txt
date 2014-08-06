@@ -25,15 +25,23 @@ FILE(GLOB HEAD "code/*.h")
 SOURCE_GROUP(speedyshare FILES ${SRC} ${HEAD})
 LIST(APPEND CODE ${SRC} ${HEAD})
 
+SET(MOC     "code/datareceiver.h"
+            "code/datasender.h"
+            "code/datareceiverhandler.h"
+            "code/receiverthread.h"
+            "code/senderthread.h"
+            "code/speedyshare.h"
+)
+
 FILE(GLOB UI "ui/*.ui")
 
 IF(USE_QT5)
-	QT5_WRAP_CPP(speedyshare_headers_moc ${HEAD})
+	QT5_WRAP_CPP(speedyshare_headers_moc ${MOC})
 	QT5_WRAP_UI(speedyshare_ui ${UI})
 	QT5_ADD_RESOURCES(speedyshare_res "ui/resources.qrc")
 	ADD_DEFINITIONS(__QT5__)
 ELSE()
-	QT4_WRAP_CPP(speedyshare_headers_moc ${HEAD})
+	QT4_WRAP_CPP(speedyshare_headers_moc ${MOC})
 	QT4_WRAP_UI(speedyshare_ui ${UI})
 	QT4_ADD_RESOURCES(speedyshare_res "ui/resources.qrc")
 	INCLUDE(${QT_USE_FILE})

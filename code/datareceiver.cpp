@@ -159,4 +159,3 @@ DataReceiver::OnDenyFile( const QString& file, int index )
 	DataReceiverHandler* dataHandler = this->dataHandlers[index];
 	dataHandler->OnDenyFile(file);
 }
-
