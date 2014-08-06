@@ -12,6 +12,7 @@ It still requires some work:
   - Displaying the local network in a browser would be nice.
   - Aborting the retrieval of a file doesn't remove the progress bar from the sender.
   - Running in the background would be nice since the window isn't really necessary if one is receiving files.
+  - Drag'n'drop.
   - Being able to change the listening port.
 
 
