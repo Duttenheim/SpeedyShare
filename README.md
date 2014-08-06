@@ -14,7 +14,7 @@ It still requires some work:
   - Running in the background would be nice since the window isn't really necessary if one is receiving files.
   - Drag'n'drop.
   - Being able to change the listening port.
-  - Being able to queue (or in paralell) upload to more than one peer.
+  - Being able to queue (or in parallel) upload to more than one peer.
 
 
 Download pre-built binary for Windows at:
