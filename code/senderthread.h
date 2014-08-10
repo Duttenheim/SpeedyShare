@@ -35,7 +35,7 @@ public:
 	/// starts thread
 	void Start();
 	/// stops thread
-	void Stop();
+	bool Stop();
 
 	/// aborts current file
 	void AbortCurrent();

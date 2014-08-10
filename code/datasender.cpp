@@ -7,7 +7,9 @@
 */
 DataSender::DataSender(void) :
 	port(MAINPORT),
-	abortCurrent(false)
+	abortCurrent(false),
+    isSending(false),
+    isPaused(false)
 {
 	// empty
 }
@@ -32,6 +34,9 @@ DataSender::Open()
 	// setup stream
 	this->stream.setDevice(this);
 
+    // unpause
+    this->isPaused = false;
+
 	// wait until connection occurs
 	return this->waitForConnected(1000);
 }
@@ -52,6 +57,8 @@ DataSender::Close()
 void 
 DataSender::Update()
 {
+    if (this->isPaused) return;
+
 	// read incoming messages if we have bytes waiting, do not do waitForReadyRead here since it will only be true once for some reason...
 	qint32 available = this->bytesAvailable();
 	if (available > 0)
@@ -83,7 +90,7 @@ DataSender::Send( const FilePackage& data )
 		QDataStream stream(&message, QIODevice::WriteOnly);
 
 		// write magic number
-		stream << 'REQF';
+		stream << REQUEST_FILE;
 		stream << name;
 
 		// add to pending packages
@@ -104,7 +111,7 @@ DataSender::Read()
 	qint32 magic;
 	this->stream >> magic;
 
-	if (magic == 'ACPF')
+	if (magic == ACCEPT_FILE)
 	{
 		// get response
 		bool answer;
@@ -116,6 +123,9 @@ DataSender::Read()
 
 		if (answer)
 		{
+            // check bool saying we are sending
+            this->isSending = true;
+
 			// get package
 			Q_ASSERT(this->pendingPackages.contains(name));
 			FilePackage package = this->pendingPackages[name];		
@@ -132,7 +142,7 @@ DataSender::Read()
 			QDataStream dataStream(&dataPackage, QIODevice::WriteOnly);			
 
 			// write magic
-			dataStream << 'PACK';
+			dataStream << PACKAGE;
 			dataStream << name;
 			dataStream << numPackages;
 
@@ -157,7 +167,7 @@ DataSender::Read()
 					qint32 packageSize = qMin(MAXPACKAGESIZE, fileData.size());
 
 					// reset data stream, then send chunk header				
-					dataStream << 'CHNK';
+					dataStream << CHUNK;
 					dataStream << packageSize;
 
 					// send type and size
@@ -181,7 +191,7 @@ DataSender::Read()
 				{
 					// flip dat bool!
 					this->abortCurrent = false;
-					dataStream << 'ABRT';
+					dataStream << ABORT;
 
 					// send type
 					this->write(dataPackage);
@@ -198,11 +208,17 @@ DataSender::Read()
 			// close file
 			fileHandle->close();
 
+            // inform we are not sending anymore
+            this->isSending = false;
+
 			// trigger data send done
 			emit FileDone(package.GetName());
 		}
 		else
 		{
+            // inform we are not sending anymore
+            this->isSending = false;
+
 			// emit that the file should not be sent
 			emit FileDenied(name);
 		}
@@ -223,4 +239,13 @@ DataSender::Write()
 		this->messages.removeFirst();
 	} 
 	while (this->messages.size() > 0);
+}
+
+//------------------------------------------------------------------------------
+/**
+*/
+void 
+DataSender::TogglePause()
+{
+    this->isPaused = !this->isPaused;
 }

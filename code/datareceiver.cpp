@@ -38,9 +38,28 @@ DataReceiver::Open()
 //------------------------------------------------------------------------------
 /**
 */
+bool
+DataReceiver::ReOpen(uint port)
+{
+    this->close();
+    return this->listen(QHostAddress::Any, port);
+}
+
+//------------------------------------------------------------------------------
+/**
+*/
 void 
 DataReceiver::Close()
 {
+    int i;
+    for (i = 0; i < this->dataHandlers.size(); i++)
+    {
+        // disconnect to avoid double signals
+        disconnect(this->dataHandlers[i], SIGNAL(ConnectionDied()), this, SLOT(OnConnectionDied()));
+        this->dataHandlers[i]->Kill();
+        delete this->dataHandlers[i];
+    }
+    this->dataHandlers.clear();
 	this->close();
 }
 
@@ -55,14 +74,12 @@ DataReceiver::Update()
 	{
 		// get socket
 		QTcpSocket* newSocket = this->nextPendingConnection();
-		connect(newSocket, SIGNAL(disconnected()), this, SLOT(OnConnectionDied()));
-		this->connections.append(newSocket);
-
 		DataReceiverHandler* dataHandler = new DataReceiverHandler(newSocket);
 		connect(dataHandler, SIGNAL(NewRequest(const QString&, const QString&)), this, SLOT(OnFileRequested(const QString&, const QString&)));
 		connect(dataHandler, SIGNAL(TransactionDone(const QString&)), this, SLOT(OnFileDone(const QString&)));
 		connect(dataHandler, SIGNAL(TransactionProgress(const QString&, const QByteArray&)), this, SLOT(OnFileProgress(const QString&, const QByteArray&)));
 		connect(dataHandler, SIGNAL(TransactionStarted(const QString&, int)), this, SLOT(OnFileStart(const QString&, int)));
+        connect(dataHandler, SIGNAL(ConnectionDied()), this, SLOT(OnConnectionDied()));
 		this->dataHandlers.append(dataHandler);
 	}
 
@@ -80,14 +97,13 @@ DataReceiver::Update()
 void 
 DataReceiver::OnConnectionDied()
 {
-	// get socket
-	QTcpSocket* socket = static_cast<QTcpSocket*>(this->sender());
+	// get handler
+	DataReceiverHandler* handler = static_cast<DataReceiverHandler*>(this->sender());
 	
 	// get index of connection
-	int index = this->connections.indexOf(socket);
-	this->dataHandlers[index]->Kill();
+	int index = this->dataHandlers.indexOf(handler);
+    delete handler;
 	this->dataHandlers.removeAt(index);
-	this->connections.removeAt(index);
 }
 
 //------------------------------------------------------------------------------

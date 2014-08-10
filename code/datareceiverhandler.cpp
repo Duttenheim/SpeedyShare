@@ -9,13 +9,21 @@
 #include <QtNetwork/QHostAddress>
 #include "config.h"
 
+#define WAIT_FOR_BYTES(socket, num) \
+    while(socket->bytesAvailable() < num && !this->stopRequested) \
+    { \
+        QApplication::processEvents(); \
+    }
+
 //------------------------------------------------------------------------------
 /**
 */
-DataReceiverHandler::DataReceiverHandler( QTcpSocket* socket )
+DataReceiverHandler::DataReceiverHandler( QTcpSocket* socket ) :
+    stopRequested(false)
 {
 	this->socket = socket;
 	this->stream.setDevice(socket);
+    connect(this->socket, SIGNAL(disconnected()), this, SLOT(OnSocketDisconnect()));
 }
 
 //------------------------------------------------------------------------------
@@ -23,7 +31,9 @@ DataReceiverHandler::DataReceiverHandler( QTcpSocket* socket )
 */
 DataReceiverHandler::~DataReceiverHandler()
 {
-	this->socket = 0;
+    disconnect(this->socket, SIGNAL(disconnected()));
+	this->socket = NULL;
+    this->stream.unsetDevice();
 }
 
 //------------------------------------------------------------------------------
@@ -34,6 +44,7 @@ DataReceiverHandler::Kill()
 {
 	this->socket->disconnectFromHost();
 	this->socket->close();
+    this->stopRequested = true;
 }
 
 //------------------------------------------------------------------------------
@@ -49,7 +60,10 @@ DataReceiverHandler::Update()
 	}
 
 	// write pending messages
-	this->Write();
+    if (!this->stopRequested)
+    {
+	    this->Write();
+    }
 }
 
 //------------------------------------------------------------------------------
@@ -66,12 +80,12 @@ DataReceiverHandler::Read()
 	QString file;
 	this->stream >> file;
 
-	if (magic == 'REQF')
+	if (magic == REQUEST_FILE)
 	{
 		this->pendingFiles.append(file);
 		emit NewRequest(file, this->socket->peerAddress().toString());
 	}
-	else if (magic == 'PACK')
+	else if (magic == PACKAGE)
 	{
 		// read number of packages
 		qint32 numPackages;
@@ -85,39 +99,30 @@ DataReceiverHandler::Read()
 		for (i = 0; i < numPackages; i++)
 		{
 			// wait until we can read package type
-			while (this->socket->bytesAvailable() < sizeof(qint32))
-			{
-				QApplication::processEvents();
-			}
+            WAIT_FOR_BYTES(this->socket, sizeof(quint32));
 
 			// read package type
 			qint32 type;			
 			this->stream >> type;			
 
 			// only read chunk if we actually have a chunk
-			if (type == 'CHNK')
+			if (type == CHUNK)
 			{
-				// wait until we can read the package size
-				while (this->socket->bytesAvailable() < sizeof(qint32))
-				{
-					QApplication::processEvents();
-				}
+                // wait until we can read the package size
+                WAIT_FOR_BYTES(this->socket, sizeof(quint32));
 
 				// read size of package
 				qint32 size;
 				this->stream >> size;
 
-				// wait until the package can be read
-				while (this->socket->bytesAvailable() < size)
-				{
-					QApplication::processEvents();
-				}
+                // wait until the package can be read
+                WAIT_FOR_BYTES(this->socket, size);
 
 				// read chunk
 				QByteArray chunk = this->socket->read(size);
 				emit this->TransactionProgress(file, chunk);
 			}
-			else if (type == 'ABRT')
+			else if (type == ABORT)
 			{
 				// abort!!!
 				emit this->TransactionAborted(file);
@@ -176,7 +181,7 @@ DataReceiverHandler::OnAcceptFile( const QString& file )
 	QDataStream stream(&package, QIODevice::WriteOnly);
 
 	// package stream
-	stream << 'ACPF';
+	stream << ACCEPT_FILE;
 	stream << true;
 	stream << file;
 
@@ -201,10 +206,19 @@ DataReceiverHandler::OnDenyFile( const QString& file )
 	QDataStream stream(&package, QIODevice::WriteOnly);
 
 	// package stream
-	stream << 'ACPF';
+	stream << ACCEPT_FILE;
 	stream << false;
 	stream << file;
 
 	// send answer
 	this->messages.append(package);
+}
+
+//------------------------------------------------------------------------------
+/**
+*/
+void 
+DataReceiverHandler::OnSocketDisconnect()
+{
+    emit ConnectionDied();
 }

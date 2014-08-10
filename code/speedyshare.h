@@ -9,12 +9,17 @@
 #include <QtGui/QMainWindow>
 #include <QtGui/QFileDialog>
 #include <QtGui/QProgressBar>
+#include <QtGui/QDropEvent>
 #endif
 
+#include <QtCore/QTimer>
+#include <QtNetwork/QUdpSocket>
+#include <QtNetwork/QNetworkAccessManager>
 #include "senderthread.h"
 #include "receiverthread.h"
 #include "ui_speedyshare.h"
 #include "ui_connectdialog.h"
+#include "ui_networkbrowser.h"
 
 class SpeedyShare : public QMainWindow
 {
@@ -29,14 +34,31 @@ public:
 	/// called whenever the window is closed
 	void closeEvent(QCloseEvent* e);
 
+    /// called whenever a drag enters the window
+    void dragEnterEvent(QDragEnterEvent* e);    
+    /// called when we get a file dragged and dropped
+    void dropEvent(QDropEvent* e);
+
 signals:
 	/// emitted when a file is accepted
 	void FileAccepted(const QString& file, int index);
 	/// emitted when a file is denied
 	void FileDenied(const QString& file, int index);
+    /// emitted when we get a new peer
+    void SpeedySharePeerFound(const QHostAddress& addr);
 private slots:
 	/// called whenever the connect button is pressed
 	void OnConnectPressed();
+    /// called whenever the service announcement socket needs updating
+    void OnServiceUpdate();
+    /// called when the browse network button gets pressed
+    void OnBrowseNetwork();
+    /// called whenever the amazon web service responded with our public ip
+    void OnPublicIp();
+    /// called whenever we find a peer on the network which uses speedyshare
+    void OnAddPeer(const QHostAddress& addr);
+    /// called whenever the user clicks on a peer in the network browser
+    void OnPeerClicked(QListWidgetItem* item);
 public slots:
 	/// called whenever the sender is connected
 	void OnSenderConnected();
@@ -67,12 +89,18 @@ public slots:
 	void OnSendPressed();
 
 private:
+    /// start a file send
+    bool SendFile(const QString& path);
+
+    QNetworkAccessManager networkManager;
+
 	ReceiverThread receiverThread;
 	SenderThread senderThread;
 	QDialog connectDialog;
 	QFileDialog fileDialog;
 	Ui::ConnectDialog dialogUi;
 	Ui::SpeedyShareClass ui;
+    Ui::NetworkBrowser browserUi;
 	QMap<int, QMap<QString, QFile*> > fileReceiveMap;
 	QMap<int, QMap<QString, QProgressBar*> > progressReceiveMap;
 	QMap<int, QMap<QString, QLabel*> > labelReceiveMap;
@@ -80,6 +108,13 @@ private:
 	QMap<QString, QProgressBar*> progressSendMap;
 	QMap<QString, QLabel*> labelSendMap;
 	QMap<QString, QPushButton*> abortSendMap;
+
+    QTimer serviceUpdateTimer;
+    QUdpSocket serviceSocket;
+    QHostAddress localAddress;
+    QList<QHostAddress> localPeers;
+    QDialog networkBrowser;
+
 	bool isConnected;
 };
 

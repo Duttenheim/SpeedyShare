@@ -1,4 +1,5 @@
 #include "receiverthread.h"
+#include <QApplication>
 
 //------------------------------------------------------------------------------
 /**
@@ -57,9 +58,10 @@ ReceiverThread::run()
 	// run receiver thread loop
 	while(!this->shouldStop)
 	{
-		this->receiver->Update();
-		QThread::yieldCurrentThread();
-		QThread::msleep(5);
+		this->receiver->Update();        
+        QApplication::processEvents();
+        QThread::yieldCurrentThread();
+		QThread::msleep(16);
 	}
 
 	this->shouldStop = false;
@@ -68,7 +70,7 @@ ReceiverThread::run()
 	this->receiver->Close();
 
 	// delete receiver
-	delete this->receiver;
+	//delete this->receiver;
 }
 
 //------------------------------------------------------------------------------
@@ -125,3 +127,11 @@ ReceiverThread::OnFileDenied( const QString& file, int index )
 	this->receiver->OnDenyFile(file, index);
 }
 
+//------------------------------------------------------------------------------
+/**
+*/
+void 
+ReceiverThread::OnPortChanged(uint port)
+{
+    this->receiver->ReOpen(port);
+}

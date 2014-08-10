@@ -1,11 +1,18 @@
 #include "senderthread.h"
 #include <QApplication>
 
+#if __QT5__
+#include <QtWidgets/QMessageBox>
+#else
+#include <QtGui/QMessageBox>
+#endif
+
 //------------------------------------------------------------------------------
 /**
 */
 SenderThread::SenderThread(void) :
-	connectionOpen(false)
+	connectionOpen(false),
+    sender(NULL)
 {
 	// empty
 }
@@ -31,10 +38,24 @@ SenderThread::Start()
 //------------------------------------------------------------------------------
 /**
 */
-void 
+bool
 SenderThread::Stop()
 {
-	this->shouldStop = true;
+    this->mutex.lock();
+    if (this->sender && this->sender->IsSending())
+    {
+        this->sender->TogglePause();
+        int result = QMessageBox::warning(NULL, "Warning!", "You currently have files uploading, are you completely sure you want to disconnect?", QMessageBox::Yes, QMessageBox::No);
+        if (result == QMessageBox::No)
+        {
+            // basically abort the stopping
+            return false;
+        }
+    }
+    if (this->sender) this->sender->AbortCurrent();
+    this->shouldStop = true;
+    this->mutex.unlock();
+    return true;
 }
 
 //------------------------------------------------------------------------------
@@ -44,7 +65,7 @@ void
 SenderThread::AbortCurrent()
 {
 	this->mutex.lock();
-	this->sender->AbortCurrent();
+	if (this->sender) this->sender->AbortCurrent();
 	this->mutex.unlock();
 }
 
@@ -95,21 +116,19 @@ SenderThread::run()
 				this->sender->Send(this->dataQueue.dequeue());
 				this->mutex.unlock();
 			}
-			
 			this->sender->Update();
 		}
-		QApplication::processEvents();
-		QThread::yieldCurrentThread();
-		QThread::msleep(5);
+        QApplication::processEvents();
+        QThread::yieldCurrentThread();
+		QThread::msleep(16);
 	}
-
-	this->shouldStop = false;
 
 	// close sender
 	this->sender->Close();
 
 	// delete sender
 	delete this->sender;
+    this->sender = NULL;
 }
 
 //------------------------------------------------------------------------------
@@ -130,6 +149,7 @@ SenderThread::OnDisconnected()
 {
 	this->quit();
 	this->connectionOpen = false;
+    this->AbortCurrent();
 	emit Disconnected();
 }
 

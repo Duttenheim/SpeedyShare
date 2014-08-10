@@ -32,6 +32,10 @@ public:
 	void OnAcceptFile(const QString& file);
 	/// called whenever a file is denied
 	void OnDenyFile(const QString& file);
+private slots:
+    /// called when the socket disconnects
+    void OnSocketDisconnect();
+
 signals:
 	/// emitted when a file is requested
 	void NewRequest(const QString& file, const QString& peer);
@@ -47,6 +51,8 @@ signals:
 	void TransactionAborted(const QString& file);
 	/// emitted if an unknown package has been received
 	void TransactionCorrupted(const QString& file);
+    /// emitted if the socket died
+    void ConnectionDied();    
 private:
 	bool stopRequested;
 	QTcpSocket* socket;

@@ -46,6 +46,12 @@ public:
 	/// called whenever we want to abort the current file
 	void AbortCurrent();
 
+    /// returns true whether or not the sender is sending
+    bool IsSending() const;
+
+    /// toggles pausing
+    void TogglePause();
+
 signals:
 	/// called when the file is denied
 	void FileDenied(const QString& file);
@@ -61,6 +67,8 @@ private:
 	QMap<QString, FilePackage> pendingPackages;
 	QHostAddress address;
 	quint16 port;
+    bool isSending;
+    bool isPaused;
 	bool abortCurrent;
 };
 
@@ -90,4 +98,13 @@ inline void
 DataSender::AbortCurrent()
 {
 	this->abortCurrent = true;
+}
+
+//------------------------------------------------------------------------------
+/**
+*/
+inline bool 
+DataSender::IsSending() const
+{
+    return this->isSending;
 }

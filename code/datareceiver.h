@@ -22,10 +22,12 @@ public:
 
 	/// open receiver
 	bool Open();
+    /// set the port and reopens the receiver
+    bool ReOpen(uint port);
 	/// closes receiver
 	void Close();
 	/// updates receiver
-	void Update();
+	void Update();    
 
 	/// called whenever the receiver thread should accept a file
 	void OnAcceptFile(const QString& file, int index);
@@ -55,6 +57,5 @@ signals:
 private:
 
 	QMap<QString, QTcpSocket*> pendingFiles;
-	QList<QTcpSocket*> connections;
 	QList<DataReceiverHandler*> dataHandlers;
 };

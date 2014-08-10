@@ -26,6 +26,8 @@ public slots:
 	void OnFileAccepted(const QString& file, int index);
 	/// called whenever a file is denied
 	void OnFileDenied(const QString& file, int index);
+    /// called whenever the port has changed
+    void OnPortChanged(uint port);
 private slots:
 	/// called whenever a file is requested
 	void OnFileRequested(const QString& file, const QString& peer, int index);
