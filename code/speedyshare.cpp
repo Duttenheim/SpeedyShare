@@ -197,22 +197,26 @@ SpeedyShare::OnServiceUpdate()
         QHostAddress receiver;
         qint64 size = this->serviceSocket.readDatagram(buf, 256, &receiver);
         QByteArray data(buf, size);
-        QDataStream stream(&data, QIODevice::ReadOnly);
+        QDataStream instream(&data, QIODevice::ReadOnly);
 
         qint32 magic;
-        stream >> magic;
+        instream >> magic;
         
         // if you get asked if you are speedyshare, respond with YES
         if (magic == ARE_YOU_SPEEDYSHARE)
         {
+            // get ip from sender
+            QString sender;
+            instream >> sender;
+
             // clear buffer and use the byte array to write some new stuff
             QByteArray data;
-            QDataStream stream(&data, QIODevice::WriteOnly);
-            stream << PEER_IS_SPEEDYSHARE;     
+            QDataStream outstream(&data, QIODevice::WriteOnly);
+            outstream << PEER_IS_SPEEDYSHARE;     
 
             // we write our local address because the response we will get from the broadcast is the router
-            stream << this->localAddress.toString();
-            this->serviceSocket.writeDatagram(data, receiver, SERVICEPORT);
+            outstream << this->localAddress.toString();
+            this->serviceSocket.writeDatagram(data, QHostAddress(sender), SERVICEPORT);
             this->serviceSocket.waitForBytesWritten(-1);
         }
         else if (magic == PEER_IS_SPEEDYSHARE)
@@ -220,7 +224,7 @@ SpeedyShare::OnServiceUpdate()
             // get address from string
             QString me = this->localAddress.toString();
             QString them;
-            stream >> them;
+            instream >> them;
             if (me != them)
             {
                 QHostAddress addr(them);
@@ -248,6 +252,7 @@ SpeedyShare::OnBrowseNetwork()
     QByteArray data;
     QDataStream stream(&data, QIODevice::WriteOnly);
     stream << ARE_YOU_SPEEDYSHARE;
+    stream << this->localAddress.toString();
 
     QUdpSocket broadcastSocket;
     broadcastSocket.writeDatagram(data, QHostAddress::Broadcast, SERVICEPORT);
