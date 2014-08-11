@@ -34,6 +34,11 @@ DataSender::Open()
 	// setup stream
 	this->stream.setDevice(this);
 
+    // setup keepalive
+    this->keepAliveTimer.setInterval(5000);
+    this->keepAliveTimer.start();
+    connect(&this->keepAliveTimer, SIGNAL(timeout()), this, SLOT(KeepAlive()));    
+
     // unpause
     this->isPaused = false;
 
@@ -248,4 +253,20 @@ void
 DataSender::TogglePause()
 {
     this->isPaused = !this->isPaused;
+}
+
+//------------------------------------------------------------------------------
+/**
+*/
+void 
+DataSender::KeepAlive()
+{
+    // create new header
+    QByteArray dataPackage;
+    QDataStream dataStream(&dataPackage, QIODevice::WriteOnly);		
+    dataStream << KEEP_ALIVE;
+
+    // send keepalive package
+    this->write(dataPackage);
+    this->waitForBytesWritten(-1);
 }

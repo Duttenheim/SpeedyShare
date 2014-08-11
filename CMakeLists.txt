@@ -1,6 +1,17 @@
 CMAKE_MINIMUM_REQUIRED(VERSION 2.8)
 PROJECT(speedyshare)
 
+# The version number.
+SET(speedyshare_VERSION_MAJOR 1)
+SET(speedyshare_VERSION_MINOR 0)
+ 
+# configure a header file to pass some of the CMake settings
+# to the source code
+CONFIGURE_FILE(
+  "code/version.h.in"
+  "../code/version.h"
+)
+  
 SET(QT_USE_QTNETWORK TRUE)
 
 INCLUDE_DIRECTORIES(${CMAKE_CURRENT_BINARY_DIR})

@@ -15,3 +15,5 @@
 #define PACKAGE 'PACK'
 #define CHUNK 'CHNK'
 #define ABORT 'ABRT'
+
+#define KEEP_ALIVE 'KEEP'

@@ -76,17 +76,21 @@ DataReceiverHandler::Read()
 	qint32 magic;
 	this->stream >> magic;
 
-	// get name
-	QString file;
-	this->stream >> file;
-
 	if (magic == REQUEST_FILE)
 	{
+        // get name
+        QString file;
+        this->stream >> file;
+
 		this->pendingFiles.append(file);
 		emit NewRequest(file, this->socket->peerAddress().toString());
 	}
 	else if (magic == PACKAGE)
 	{
+        // get name
+        QString file;
+        this->stream >> file;
+
 		// read number of packages
 		qint32 numPackages;
 		this->stream >> numPackages;
@@ -140,8 +144,16 @@ DataReceiverHandler::Read()
 		emit this->TransactionDone(file);
 		QApplication::processEvents();
 	}
+    else if (magic == KEEP_ALIVE)
+    {
+        // do nothing, this is required to keep the connection alive
+    }
 	else
 	{
+        // get name
+        QString file;
+        this->stream >> file;
+
 		// woops, unknown FourCC means something went wrong
 		emit this->TransactionCorrupted(file);
 	}

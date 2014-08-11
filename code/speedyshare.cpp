@@ -17,6 +17,7 @@
 #include <QtNetwork/QNetworkReply>
 #include <QList>
 #include "config.h"
+#include "version.h"
 
 //------------------------------------------------------------------------------
 /**
@@ -29,6 +30,10 @@ SpeedyShare::SpeedyShare(QWidget *parent, Qt::WindowFlags flags) :
 	this->dialogUi.setupUi(&this->connectDialog);
     this->browserUi.setupUi(&this->networkBrowser);
     this->setAcceptDrops(true);
+
+    QString version;
+    version.sprintf(" (build %d.%d)", speedyshare_VERSION_MAJOR, speedyshare_VERSION_MINOR);
+    this->setWindowTitle(this->windowTitle() + version);
 
 	// setup file dialog
 	this->fileDialog.setAcceptMode(QFileDialog::AcceptOpen);

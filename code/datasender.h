@@ -5,6 +5,7 @@
 #include <QByteArray>
 #include <QQueue>
 #include <QDataStream>
+#include <QTimer>
 #include "filepackage.h"
 
 //------------------------------------------------------------------------------------
@@ -52,6 +53,9 @@ public:
     /// toggles pausing
     void TogglePause();
 
+private slots:
+    /// called whenever the data sender invokes a keepalive
+    void KeepAlive();
 signals:
 	/// called when the file is denied
 	void FileDenied(const QString& file);
@@ -66,6 +70,7 @@ private:
 	QList<QByteArray> messages;
 	QMap<QString, FilePackage> pendingPackages;
 	QHostAddress address;
+    QTimer keepAliveTimer;
 	quint16 port;
     bool isSending;
     bool isPaused;
