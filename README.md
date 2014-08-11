@@ -14,6 +14,7 @@ It still requires some work:
   - Being able to change the listening port.
   - Being able to queue (or in parallel) upload to more than one peer.
   - Being able to stop a file transfer as the receiver.
+  - Notifications for when stuff happens behind the curtains.
 
 
 Download pre-built binary for Windows at:
