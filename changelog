@@ -1,0 +1,6 @@
+Changelog
+
+Version 1.1:
+Appears as an invisible icon (hmm) in the system tray on OS:es which supports this. 
+Outputs notifications such as transfer completed.
+Outputs notifications for connection issues or interrupted downloads.
